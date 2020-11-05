@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#include "MemoryStream.h"
 #include "Networks.h"
 
 #include "ModuleNetworking.cpp"
