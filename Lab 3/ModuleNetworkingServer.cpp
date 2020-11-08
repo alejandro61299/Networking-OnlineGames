@@ -118,13 +118,20 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		std::string playerName;
 		packet >> playerName;
 
-		for (auto& connectedSocket : connectedSockets) 
-		{
-			if (connectedSocket.socket == s) {
-				connectedSocket.playerName = playerName;
 
-				break;
-			}
+		if (!CheckIfNameExist(playerName))
+		{
+			onSocketDisconnected(s, DisconnectionType::NameExist);
+
+			break;
+		}
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket == s) connectedSocket.playerName = playerName;
+
+			//Send the welcome message to everyone.
+			sendWelcomePacket(connectedSocket.socket, playerName);
 		}
 		break; }
 
@@ -193,23 +200,87 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 	}
 }
 
-void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
+bool ModuleNetworkingServer::CheckIfNameExist(std::string& playerName)
 {
+	for (auto& connectedSocket : connectedSockets)
+	{
+		if (connectedSocket.playerName == playerName)
+			return false;
+	}
+
+	return true;
+}
+
+void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionType t)
+{
+
 	// Remove the connected socket from the list
+	std::string name;
 	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
-		auto &connectedSocket = *it;
+		auto& connectedSocket = *it;
 		if (connectedSocket.socket == socket)
 		{
+			name = connectedSocket.playerName;
+
+			OutputMemoryStream stream;
+			stream << ServerMessage::Disconnection;
+			stream << t;
+
+
+			sendPacket(stream, socket);
+
+
 			connectedSockets.erase(it);
+
 			break;
 		}
+
+	}
+
+	if (t != DisconnectionType::NameExist) //If the problem is the name alredy exist, the user is not connected ate the eyes of the rest, so it's not necessary to send a message of disconnection.
+	{
+		// Send message of disconnection
+		for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+		{
+			auto& currentSocket = *it;
+
+			ChatMessage chatMessage(
+				std::string(name + " se ha desconectado :_("),
+				ChatMessage::Type::Normal,
+				"",
+				name,
+				"");
+
+			OutputMemoryStream stream;
+			stream << ServerMessage::ChatMessage;
+			chatMessage.Write(stream);
+			sendPacket(stream, currentSocket.socket);
+		}
+	}
+
+	if (t == DisconnectionType::Error)
+	{
+		// Send message of error to the user
+
+		ChatMessage chatMessage(
+			std::string(name + " se ha desconectado :_("),
+			ChatMessage::Type::Normal,
+			"",
+			name,
+			"");
+
+		OutputMemoryStream stream;
+		stream << ServerMessage::ChatMessage;
+		chatMessage.Write(stream);
+		sendPacket(stream, socket);
+
 	}
 }
 
 
 
-void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket)
+void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket, std::string name)
 {
 
 	// ----------
@@ -220,7 +291,20 @@ void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket)
 		"******************************************\n");
 
 	// ----------
-	std::map<std::string, uint32>::iterator randomColor;
+	std::map<std::string, ImVec4>::iterator randomColor = colors.begin();
 	std::advance(randomColor, rand() % colors.size());
+
+	ChatMessage chatMessage(
+		std::string("Dadle la bienvenida a " + name + "!!"),
+		ChatMessage::Type::Normal,
+		randomColor->first,
+		name,
+		"");
+
+	OutputMemoryStream stream;
+	stream << ServerMessage::ChatMessage;
+	chatMessage.Write(stream);
+	sendPacket(stream, socket);
+
 }
 

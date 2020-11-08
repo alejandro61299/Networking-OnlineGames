@@ -22,7 +22,7 @@ void ModuleNetworking::reportError(const char* inOperationDesc)
 	ELOG("Error %s: %d- %s", inOperationDesc, errorNum, lpMsgBuf);
 }
 
-void ModuleNetworking::disconnect()
+void ModuleNetworking::disconnectAllSockets()
 {
 	for (SOCKET socket : sockets)
 	{
@@ -117,17 +117,23 @@ bool ModuleNetworking::preUpdate()
 
 	for (auto s : disconnectedSockets)
 	{
-		onSocketDisconnected(s);
-		std::vector<SOCKET>::iterator itr = std::find(sockets.begin(), sockets.end(), s);
-		sockets.erase(itr);
+		DisconnectSocket(s, DisconnectionType::Error);
+
 	}
 
 	return true;
 }
 
+void ModuleNetworking::DisconnectSocket(SOCKET& s, DisconnectionType t)
+{
+	onSocketDisconnected(s, t);
+	std::vector<SOCKET>::iterator itr = std::find(sockets.begin(), sockets.end(), s);
+	sockets.erase(itr);
+}
+
 bool ModuleNetworking::cleanUp()
 {
-	disconnect();
+	disconnectAllSockets();
 
 	NumModulesUsingWinsock--;
 	if (NumModulesUsingWinsock == 0)

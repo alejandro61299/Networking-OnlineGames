@@ -27,7 +27,7 @@ private:
 
 	virtual void onSocketReceivedData(SOCKET s, const InputMemoryStream &packet) = 0;
 
-	virtual void onSocketDisconnected(SOCKET s) = 0;
+	virtual void onSocketDisconnected(SOCKET s, DisconnectionType t) = 0;
 
 protected:
 
@@ -76,9 +76,12 @@ protected:
 
 	void addSocket(SOCKET socket);
 
-	void disconnect();
+	void disconnectAllSockets();
 
 	static void reportError(const char *message);
+
+	void DisconnectSocket(SOCKET& s, DisconnectionType t);
+
 };
 
 

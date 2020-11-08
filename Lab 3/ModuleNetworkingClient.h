@@ -34,7 +34,7 @@ private:
 
 	void onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet) override;
 
-	void onSocketDisconnected(SOCKET socket) override;
+	void onSocketDisconnected(SOCKET socket, DisconnectionType t) override;
 
 	void processInputText(const std::string& currentMessage);
 

@@ -38,9 +38,11 @@ private:
 
 	void onSocketReceivedData(SOCKET s, const InputMemoryStream& packet) override;
 
-	void onSocketDisconnected(SOCKET socket) override;
+	bool CheckIfNameExist(std::string& playerName);
 
-	void sendWelcomePacket(SOCKET socket);
+	void onSocketDisconnected(SOCKET socket, DisconnectionType t) override;
+
+	void sendWelcomePacket(SOCKET socket, std::string name);
 
 
 	//////////////////////////////////////////////////////////////////////

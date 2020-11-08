@@ -13,7 +13,15 @@ enum class ClientMessage
 enum class ServerMessage
 {
 	Welcome,
-	ChatMessage
+	ChatMessage,
+	Disconnection
+};
+
+enum class DisconnectionType
+{
+	Error,
+	Exit,
+	NameExist
 };
 
 // Chat ---------------------------

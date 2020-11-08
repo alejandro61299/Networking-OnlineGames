@@ -46,7 +46,7 @@ bool ModuleNetworkingClient::update()
 		}
 		else 
 		{
-			disconnect();
+			disconnectAllSockets();
 			state = ClientState::Stopped;
 		}
 	}
@@ -109,15 +109,36 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		chatMessage.Read(packet);
 		chatMessages.push_back(chatMessage);
 		break; }
+	case ServerMessage::Disconnection: {
+		DisconnectionType type;
+		packet >> type;
+
+		DisconnectSocket(s, type);
+		switch (type)
+		{
+		case DisconnectionType::Error:
+			ELOG("An error ocurred! your connection with the server is lost");
+			break;
+		case DisconnectionType::Exit:
+			LOG("Yoy leave the chat");
+			break;
+		case DisconnectionType::NameExist:
+			ELOG("This name is not available! Try another one");
+			break;
+		default:
+			break;
+		}
+		break; }
 	default: {
 		break; }
 	}
 }
 
-void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
+void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket, DisconnectionType t)
 {
 	state = ClientState::Stopped;
 }
+
 
 void ModuleNetworkingClient::processInputText(const std::string &originalMessage )
 {
