@@ -118,35 +118,46 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		std::string playerName;
 		packet >> playerName;
 
-
-		if (!CheckIfNameExist(playerName))
-		{
+		// Check If User Name Exist --------------
+		if (!CheckIfNameExist(playerName)) {
 			onSocketDisconnected(s, DisconnectionType::NameExist);
-
 			break;
 		}
 
+		// Find User by name ---------------------
 		for (auto& connectedSocket : connectedSockets)
-		{
-			OutputMemoryStream stream;
 			if (connectedSocket.socket == s) {
-				connectedSocket.playerName = playerName;
-
-				sendWelcomePacket(s, stream);
+				connectedSocket.playerName = playerName; //Set Name in the server
+				// Send Welcome to New User 
+				OutputMemoryStream stream;
+				stream << ServerMessage::Welcome;
+				// Send random color
+				srand(time(NULL));
+				std::map<std::string, ImVec4>::iterator randomColor = colors.begin();
+				std::advance(randomColor, rand() % colors.size());
+				stream << randomColor->first;
+				// Send message 
+				ChatMessage welcomeMessage(
+					"------------------------------------------\n"
+					"			 WELCOME TO THE CHAT	       \n"
+					" Type /help to see the available commands \n"
+					"------------------------------------------\n",
+					ChatMessage::Type::Server);
+				welcomeMessage.Write(stream);
+				sendPacket(stream, connectedSocket.socket);
+				break;
 			}
 
-			//Send the welcome message to everyone.
+		// Send User by Join  ---------------------
+		OutputMemoryStream stream;
+		ChatMessage chatMessage("Give the welcome to " + playerName + "!!", ChatMessage::Type::Server);
+		stream << ServerMessage::InfoMessage;
+		chatMessage.Write(stream);
 
-			ChatMessage chatMessage(
-				std::string("Give the welcome to " + playerName + "!!"),
-				ChatMessage::Type::Server 
-				);
-
-
-			stream << ServerMessage::InfoMessage;
-			chatMessage.Write(stream);
+		for (auto& connectedSocket : connectedSockets) {
 			sendPacket(stream, connectedSocket.socket);
 		}
+
 		break; }
 
 	case ClientMessage::ChatMessage: {
@@ -207,7 +218,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			if (!finded)
 			{
 				ChatMessage errorMessage(
-					std::string("the user " + commandMessage.dstUser + " has not been founded! \nPlease, check if you have written it correctly."),
+					std::string("The user " + commandMessage.dstUser + " has not been found! \nPlease, check if you have written it correctly."),
 					ChatMessage::Type::Error,
 					"Red");
 				OutputMemoryStream stream;
@@ -369,26 +380,4 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 	}
 }
 
-
-
-void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket, OutputMemoryStream& stream)
-{
-
-	// ----------
-	std::string welcomeMsg(
-		"******************************************\n"
-		"			 WELCOME TO THE CHAT	       \n"
-		" Type /help to see the available commands \n"
-		"******************************************\n");
-
-	// ----------
-	srand(time(NULL));
-	std::map<std::string, ImVec4>::iterator randomColor = colors.begin();
-	std::advance(randomColor, rand() % colors.size());
-
-
-	stream << ServerMessage::Welcome;
-	stream << randomColor->first;
-
-}
 

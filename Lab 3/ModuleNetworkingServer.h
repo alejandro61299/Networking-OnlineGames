@@ -42,8 +42,6 @@ private:
 
 	void onSocketDisconnected(SOCKET socket, DisconnectionType t) override;
 
-	void sendWelcomePacket(SOCKET socket, OutputMemoryStream& stream);
-
 
 	//////////////////////////////////////////////////////////////////////
 	// State

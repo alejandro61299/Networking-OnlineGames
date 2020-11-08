@@ -125,12 +125,11 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 	switch (serverMessage)
 	{
 	case ServerMessage::Welcome: {
-		std::string userColor;
-		packet >> userColor;
-		playerColor = userColor;
-		ServerMessage test;
-		packet >> test;
-		 }
+		packet >> playerColor;
+		ChatMessage welcomeMessage;
+		welcomeMessage.Read(packet);
+		chatMessages.push_back(welcomeMessage);
+		break; }
 	case ServerMessage::ChatMessage: {
 		ChatMessage chatMessage;
 		chatMessage.Read(packet);
