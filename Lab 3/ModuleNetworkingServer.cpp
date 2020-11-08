@@ -1,8 +1,5 @@
 #include "ModuleNetworkingServer.h"
 
-
-
-
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworkingServer public methods
 //////////////////////////////////////////////////////////////////////
@@ -85,10 +82,8 @@ bool ModuleNetworkingServer::gui()
 				ntohs(connectedSocket.address.sin_port));
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
 		}
-
 		ImGui::End();
 	}
-
 	return true;
 }
 
@@ -112,15 +107,42 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 	connectedSockets.push_back(connectedSocket);
 }
 
-void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, byte * data)
+void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStream& packet)
 {
-	// Set the player name of the corresponding connected socket proxy
-	for (auto &connectedSocket : connectedSockets)
+	ClientMessage clientMessage;
+	packet >> clientMessage;
+
+	switch (clientMessage)
 	{
-		if (connectedSocket.socket == socket)
+	case ClientMessage::Hello: {
+		std::string playerName;
+		packet >> playerName;
+
+		for (auto& connectedSocket : connectedSockets) 
 		{
-			connectedSocket.playerName = (const char *)data;
+			if (connectedSocket.socket == s) {
+				connectedSocket.playerName = playerName;
+
+				break;
+			}
 		}
+		break; }
+	case ClientMessage::ChatMessage: {
+		ChatMessage chatMessage;
+		chatMessage.Read(packet);
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			OutputMemoryStream stream;
+			stream << ServerMessage::ChatMessage;
+			chatMessage.Write(stream);
+			sendPacket(stream, connectedSocket.socket);
+		}
+
+
+		break; }
+	default: {
+		break; }
 	}
 }
 
@@ -136,5 +158,23 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 			break;
 		}
 	}
+}
+
+
+
+void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket)
+{
+
+	// ----------
+	std::string welcomeMsg(
+		"******************************************\n"
+		"			 WELCOME TO THE CHAT	       \n"
+		" Type /help to see the available commands \n"
+		"******************************************\n");
+
+	// ----------
+	std::map<std::string, uint32>::iterator randomColor;
+	std::advance(randomColor, rand() % colors.size());
+
 }
 

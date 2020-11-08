@@ -36,10 +36,11 @@ private:
 
 	void onSocketConnected(SOCKET socket, const sockaddr_in &socketAddress) override;
 
-	void onSocketReceivedData(SOCKET socket, byte * data) override;
+	void onSocketReceivedData(SOCKET s, const InputMemoryStream& packet) override;
 
 	void onSocketDisconnected(SOCKET socket) override;
 
+	void sendWelcomePacket(SOCKET socket);
 
 
 	//////////////////////////////////////////////////////////////////////

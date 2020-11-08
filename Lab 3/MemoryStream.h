@@ -1,6 +1,6 @@
 #pragma once
-
 #include "ByteSwap.h"
+
 enum class Endianness {
 	LittleEndian,
 	BigEndian
@@ -24,16 +24,20 @@ class OutputMemoryStream
 public:
 
 	// Constructor
-	OutputMemoryStream(uint32 inSize = DEFAULT_STREAM_SIZE):
+	OutputMemoryStream(uint32 inSize = DEFAULT_STREAM_SIZE) :
 		mBuffer(nullptr), mCapacity(0), mHead(0)
-	{ ReallocBuffer(inSize); }
+	{
+		ReallocBuffer(inSize);
+	}
 
 	// Destructor
 	~OutputMemoryStream()
-	{ std::free(mBuffer); }
+	{
+		std::free(mBuffer);
+	}
 
 	// Get pointer to the data in the stream
-	const char *GetBufferPtr() const { return mBuffer; }
+	const char* GetBufferPtr() const { return mBuffer; }
 	uint32 GetCapacity() const { return mCapacity; }
 	uint32 GetSize() const { return mHead; }
 
@@ -41,50 +45,50 @@ public:
 	void Clear() { mHead = 0; }
 
 	// Write method
-	void Write(const void *inData, size_t inByteCount);
+	void Write(const void* inData, size_t inByteCount);
 
 	// Generic write for arithmetic types
 	template< typename T >
-	void Write( T inData )
+	void Write(T inData)
 	{
 		static_assert(
-				std::is_arithmetic< T >::value ||
-				std::is_enum< T >::value,
-				"Generic Write only supports primitive data types" );
+			std::is_arithmetic< T >::value ||
+			std::is_enum< T >::value,
+			"Generic Write only supports primitive data types");
 
-		if( STREAM_ENDIANNESS == PLATFORM_ENDIANNESS )
+		if (STREAM_ENDIANNESS == PLATFORM_ENDIANNESS)
 		{
-			Write( &inData, sizeof( inData ) );
+			Write(&inData, sizeof(inData));
 		}
 		else
 		{
-			T swappedData = ByteSwap( inData );
-			Write( &swappedData, sizeof( swappedData ) );
+			T swappedData = ByteSwap(inData);
+			Write(&swappedData, sizeof(swappedData));
 		}
 	}
 
 	// Generic write for vectors of arithmetic types
 	template< typename T >
-	void Write( const std::vector< T >& inVector )
+	void Write(const std::vector< T >& inVector)
 	{
 		uint32 elementCount = static_cast<uint32>(inVector.size());
-		Write( elementCount );
-		for( const T& element : inVector )
+		Write(elementCount);
+		for (const T& element : inVector)
 		{
-			Write( element );
+			Write(element);
 		}
 	}
 
 	// Write for strings
-	void Write( const std::string& inString )
+	void Write(const std::string& inString)
 	{
 		uint32 elementCount = static_cast<uint32>(inString.size());
-		Write( elementCount );
-		Write( inString.data(), elementCount * sizeof( char ) );
+		Write(elementCount);
+		Write(inString.data(), elementCount * sizeof(char));
 	}
 
 	// Write for C strings
-	void Write(const char *inString)
+	void Write(const char* inString)
 	{
 		uint32 elementCount = (uint32)strlen(inString);
 		Write(elementCount);
@@ -93,18 +97,18 @@ public:
 
 	// Generic operator <<
 	template< typename T >
-	OutputMemoryStream &operator<<(const T &data) {
+	OutputMemoryStream& operator<<(const T& data) {
 		Write(data);
 		return *this;
 	}
-	
+
 
 private:
 
 	// Resize the buffer
 	void ReallocBuffer(uint32 inNewLength);
 
-	char *mBuffer;
+	char* mBuffer;
 	uint32 mCapacity;
 	uint32 mHead;
 };
@@ -120,10 +124,12 @@ public:
 
 	// Destructor
 	~InputMemoryStream()
-	{ std::free(mBuffer); }
+	{
+		std::free(mBuffer);
+	}
 
 	// Get pointer to the data in the stream
-	char *GetBufferPtr() const { return mBuffer; }
+	char* GetBufferPtr() const { return mBuffer; }
 	uint32 GetCapacity() const { return mCapacity; }
 	uint32 GetSize() const { return mSize; }
 	uint32 RemainingByteCount() const { return mSize - mHead; }
@@ -133,54 +139,54 @@ public:
 	void Clear() { mHead = 0; }
 
 	// Read method
-	void Read(void *outData, size_t inByteCount) const;
+	void Read(void* outData, size_t inByteCount) const;
 
 	// Generic read for arithmetic types
 	template< typename T >
-	void Read( T& outData ) const
+	void Read(T& outData) const
 	{
 		static_assert(
-				std::is_arithmetic< T >::value ||
-				std::is_enum< T >::value,
-				"Generic Read only supports primitive data types" );
+			std::is_arithmetic< T >::value ||
+			std::is_enum< T >::value,
+			"Generic Read only supports primitive data types");
 
-		if( STREAM_ENDIANNESS == PLATFORM_ENDIANNESS )
+		if (STREAM_ENDIANNESS == PLATFORM_ENDIANNESS)
 		{
-			Read( &outData, sizeof( outData ) );
+			Read(&outData, sizeof(outData));
 		}
 		else
 		{
 			T unswappedData;
-			Read( &unswappedData, sizeof( unswappedData ) );
+			Read(&unswappedData, sizeof(unswappedData));
 			outData = ByteSwap(unswappedData);
 		}
 	}
 
 	// Generic read for vectors of arithmetic types
 	template< typename T >
-	void Read( std::vector< T >& inVector ) const
+	void Read(std::vector< T >& inVector) const
 	{
 		uint32 elementCount;
-		Read( elementCount );
-		inVector.resize( elementCount );
-		for( T& element : inVector)
+		Read(elementCount);
+		inVector.resize(elementCount);
+		for (T& element : inVector)
 		{
-			Read( element );
+			Read(element);
 		}
 	}
 
 	// Read for strings
-	void Read( std::string& inString ) const
+	void Read(std::string& inString) const
 	{
 		uint32 elementCount;
-		Read( elementCount );
+		Read(elementCount);
 		inString.resize(elementCount);
-		for (auto &character : inString) {
+		for (auto& character : inString) {
 			Read(character);
 		}
 	}
 	// Read for C strings
-	void Read(char * inString) const
+	void Read(char* inString) const
 	{
 		uint32 elementCount;
 		Read(elementCount);
@@ -191,14 +197,14 @@ public:
 
 	// Generic operator >>
 	template< typename T >
-	const InputMemoryStream &operator>>(T &data) const {
+	const InputMemoryStream& operator>>(T& data) const {
 		Read(data);
 		return *this;
 	}
 
 private:
 
-	char *mBuffer;
+	char* mBuffer;
 	uint32 mCapacity;
 	uint32 mSize;
 	mutable uint32 mHead;

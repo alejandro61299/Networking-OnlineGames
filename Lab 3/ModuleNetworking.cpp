@@ -1,7 +1,7 @@
 #include "Networks.h"
 #include "ModuleNetworking.h"
 #include <list>
-
+#include <map>
 static uint8 NumModulesUsingWinsock = 0;
 
 void ModuleNetworking::reportError(const char* inOperationDesc)
@@ -55,13 +55,7 @@ bool ModuleNetworking::preUpdate()
 {
 	if (sockets.empty()) return true;
 
-	
-
-	// NOTE(jesus): You can use this temporary buffer to store data from recv()
-	const uint32 incomingDataBufferSize = Kilobytes(1);
-	byte incomingDataBuffer[incomingDataBufferSize];
-
-	// TODO(jesus): select those sockets that have a read operation available
+	// Get listened sockets -------------------------------
 
 	// New socket set
 	fd_set readfds;
@@ -83,20 +77,7 @@ bool ModuleNetworking::preUpdate()
 		reportError("Select readfds failed");
 	}
 
-	// TODO(jesus): for those sockets selected, check wheter or not they are
-	// a listen socket or a standard socket and perform the corresponding
-	// operation (accept() an incoming connection or recv() incoming data,
-	// respectively).
-	// On accept() success, communicate the new connected socket to the
-	// subclass (use the callback onSocketConnected()), and add the new
-	// connected socket to the managed list of sockets.
-	// On recv() success, communicate the incoming data received to the
-	// subclass (use the callback onSocketReceivedData()).
-	
-	// TODO(jesus): handle disconnections. Remember that a socket has been
-	// disconnected from its remote end either when recv() returned 0,
-	// or when it generated some errors such as ECONNRESET.
-
+	// Process listened sockets ----------------------------
 
 	std::list<SOCKET> disconnectedSockets;
 
@@ -115,24 +96,24 @@ bool ModuleNetworking::preUpdate()
 			}
 			else { // Is a client socket
 				// Recv stuff
-				res = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
+				InputMemoryStream packet;
+				int byteRead = recv(s, packet.GetBufferPtr(), packet.GetCapacity(), 0);
 
-				if (res == SOCKET_ERROR || res == 0) {
+				if (byteRead > 0)
+				{
+					packet.SetSize((uint32)byteRead);
+					onSocketReceivedData(s, packet);
+				}
+				else {
 					reportError("Disconnection");
 					disconnectedSockets.push_back(s);
 				}
-				else
-				{
-					onSocketReceivedData(s, incomingDataBuffer);
-				}
+
 			}
 		}
 	}
 
-	// Communicate detected disconnections to the subclass using the callback
-	// onSocketDisconnected().
-	// TODO(jesus): Finally, remove all disconnected sockets from the list
-	// of managed sockets.
+	// Delete Disconnected Sockets ----------------------
 
 	for (auto s : disconnectedSockets)
 	{
@@ -166,3 +147,14 @@ void ModuleNetworking::addSocket(SOCKET socket)
 {
 	sockets.push_back(socket);
 }
+
+bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+	if (result == SOCKET_ERROR) {
+		reportError("Send Packet");
+		return false;
+	}
+	return true;
+}
+

@@ -1,6 +1,5 @@
 #include "ModuleNetworkingClient.h"
 
-
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
 	playerName = pplayerName;
@@ -37,9 +36,19 @@ bool ModuleNetworkingClient::update()
 {
 	if (state == ClientState::Start)
 	{
-		send(_socket, playerName.c_str(), sizeof(playerName.c_str()), 0);
-		state == ClientState::Logging;
-		// TODO(jesus): Send the player name to the server
+		OutputMemoryStream packet;
+		packet << ClientMessage::Hello;
+		packet << playerName;
+
+		if (sendPacket(packet, _socket))
+		{
+			state = ClientState::Logging;
+		}
+		else 
+		{
+			disconnect();
+			state = ClientState::Stopped;
+		}
 	}
 
 	return true;
@@ -49,14 +58,35 @@ bool ModuleNetworkingClient::gui()
 {
 	if (state != ClientState::Stopped)
 	{
-		// NOTE(jesus): You can put ImGui code here for debugging purposes
 		ImGui::Begin("Client Window");
 
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
+		ImGui::Spacing();
 
-		ImGui::Text("%s connected to the server...", playerName.c_str());
+		for (auto& chatMessage : chatMessages) {
+			ImGui::Text(chatMessage.text.data());
+		}
+
+		static char buffer[100];
+		ImGui::InputText("Input", buffer, 100);
+
+		if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Enter))
+		{
+			ChatMessage chatMessage(
+				std::string(buffer),
+				ChatMessage::Type::Normal,
+				playerColor,
+				playerName,
+				"");
+
+
+			OutputMemoryStream stream;
+			stream << ClientMessage::ChatMessage;
+			chatMessage.Write(stream);
+			sendPacket(stream, _socket);
+		}
 
 		ImGui::End();
 	}
@@ -64,13 +94,29 @@ bool ModuleNetworkingClient::gui()
 	return true;
 }
 
-void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, byte * data)
+void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStream& packet)
 {
-	state = ClientState::Stopped;
+	ServerMessage serverMessage;
+	packet >> serverMessage;
+
+	switch (serverMessage)
+	{
+	case ServerMessage::Welcome: {
+		std::string userColor;
+		packet >> userColor;
+		playerColor = userColor;
+		break; }
+	case ServerMessage::ChatMessage: {
+		ChatMessage chatMessage;
+		chatMessage.Read(packet);
+		chatMessages.push_back(chatMessage);
+		break; }
+	default: {
+		break; }
+	}
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 {
 	state = ClientState::Stopped;
 }
-
