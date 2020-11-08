@@ -171,3 +171,14 @@ bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socke
 	return true;
 }
 
+#include <string>
+#include <ctime>
+
+std::string ModuleNetworking::GetTime()
+{
+	const time_t now = time(0);
+	tm ltm;
+	localtime_s(&ltm ,&now);
+	return  std::to_string(ltm.tm_hour) + ":" + std::to_string(ltm.tm_min);
+}
+

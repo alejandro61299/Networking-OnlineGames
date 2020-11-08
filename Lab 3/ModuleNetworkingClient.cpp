@@ -125,13 +125,12 @@ void ModuleNetworkingClient::processInputText(const std::string &originalMessage
 
 	if (currentMessage.empty()) { return; }
 	
-	OutputMemoryStream stream;
 
+	
 	if (currentMessage[0] != '/')
 	{
-		// Send Message ----------------
-		ChatMessage chatMessage(currentMessage, ChatMessage::Type::Normal, playerColor, playerName, "");
-		chatMessage.type = ChatMessage::Type::Normal;
+		OutputMemoryStream stream;
+		ChatMessage chatMessage(currentMessage, ChatMessage::Type::Normal, playerColor, playerName, GetTime());
 		stream << ClientMessage::ChatMessage;
 		chatMessage.Write(stream);
 		sendPacket(stream, _socket);
@@ -154,8 +153,6 @@ void ModuleNetworkingClient::processInputText(const std::string &originalMessage
 
 			if (commandSplited.size() > 1) {
 				std::string firstParamsWord = commandSplited[1];
-				std::string commandParameters("");
-
 				const auto strBegin = originalMessage.find(firstParamsWord);
 				const auto strEnd = originalMessage.find_last_not_of(" \t");
 				const auto strRange = strEnd - strBegin + 1;
@@ -164,33 +161,59 @@ void ModuleNetworkingClient::processInputText(const std::string &originalMessage
 
 			// Execute Command Client ----------------
 			executeCommand(commandName, commandParameters);
-
-			// Send Command to Server ----------------
-			stream << ClientMessage::ChatCommand;
-			stream << commandName;
-			stream << commandParameters;
-
-			for (auto& commandWord : commandSplited)
-			{
-				stream << commandWord;
-			}
-
-			sendPacket(stream, _socket);
+		
+		}
+		else
+		{
+			std::string errorText = "'/" + commandSplited[0] + "' is not a valid command";
+			ChatMessage errorMessage(errorText, ChatMessage::Type::Error, "Red");
+			chatMessages.push_back(errorMessage);
 		}
 	}
 }
 
 
 
-void ModuleNetworkingClient::executeCommand(std::string command, std::string commandParameters)
+void ModuleNetworkingClient::executeCommand(std::string commandName, std::string commandParameters)
 {
-	if (command == "clear")
+	OutputMemoryStream stream;
+	stream << ClientMessage::ChatCommand;
+	stream << commandName;
+
+	if (commandName == "clear")
 	{
 		chatMessages.clear();
 	}
-	else if (command == "help")
+	else if (commandName == "whisper")
 	{
+		std::vector<std::string> commandSplited = StrTool::Split(commandParameters, " ", 1);
 
+		if (commandSplited.size() < 2) return; // Command Error Message
+		std::string whisperMessage = StrTool::Trim(commandSplited[1]);
+
+		if (whisperMessage.find_first_not_of(' ') == std::string::npos) return; // Command Error Message
+		std::string whisperedUser = commandSplited[0];
+		ChatMessage commandMessage(whisperMessage, ChatMessage::Type::Command, playerColor, playerName, GetTime(), whisperedUser);
+		commandMessage.Write(stream); // Message
+	}
+	else if (commandName == "help")
+	{
+		ChatMessage chatMessage;
+
+		chatMessage.type = ChatMessage::Type::Command;
+		chatMessage.text.assign(
+			"----- Commands List ------\n"
+			"/clear\n"
+			"/help\n"
+			"/kick [username]\n"
+			"/list\n"
+			"/whisper [username] [message]\n"
+		);
+
+		chatMessages.push_back(chatMessage);
 	}
 	// Other commands
+
+	// Send Command to Server ----------------
+	sendPacket(stream, _socket);
 }

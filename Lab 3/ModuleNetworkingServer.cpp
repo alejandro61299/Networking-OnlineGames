@@ -129,24 +129,25 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		break; }
 
 	case ClientMessage::ChatMessage: {
+
 		ChatMessage chatMessage;
 		chatMessage.Read(packet);
 
+		OutputMemoryStream stream;
+		stream << ServerMessage::ChatMessage;
+		chatMessage.Write(stream);
+
 		for (auto& connectedSocket : connectedSockets)
 		{
-			OutputMemoryStream stream;
-			stream << ServerMessage::ChatMessage;
-			chatMessage.Write(stream);
 			sendPacket(stream, connectedSocket.socket);
 		}
+
 		break; }	
 
 	case ClientMessage::ChatCommand: {
 
 		std::string commandName;
 		packet >> commandName;
-		std::string commandParameters;
-		packet >> commandParameters;
 
 		if (commandName == "list")
 		{
@@ -155,6 +156,29 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		else if (commandName == "kick")
 		{
 
+		}
+		else if (commandName == "whisper")
+		{
+			std::vector<std::string> usersToSend;
+			ChatMessage commandMessage;
+			commandMessage.Read(packet);
+			usersToSend.push_back(commandMessage.srcUser);
+			usersToSend.push_back(commandMessage.dstUser);
+
+			OutputMemoryStream stream;
+			stream << ServerMessage::ChatMessage;
+			commandMessage.Write(stream);
+
+			for (auto& connectedSocket : connectedSockets)
+			{
+				std::vector<std::string>::iterator it = std::find(usersToSend.begin(), usersToSend.end(), connectedSocket.playerName);
+				if (it != usersToSend.end()) {
+					sendPacket(stream, connectedSocket.socket);
+					usersToSend.erase(it);
+				}
+				if (usersToSend.empty()) break;
+			}
+		
 		}
 
 		break; }
@@ -192,6 +216,5 @@ void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket)
 	// ----------
 	std::map<std::string, uint32>::iterator randomColor;
 	std::advance(randomColor, rand() % colors.size());
-
 }
 

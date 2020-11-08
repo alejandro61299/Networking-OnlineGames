@@ -27,18 +27,20 @@ public:
 		Whisper,
 		Server,
 		Command,
+		Error,
 		Unknown
 	};
 
 	ChatMessage() {};
-	ChatMessage(std::string text, Type type, std::string color, std::string ownerName = "", std::string time = "")
-		: text(text), type(type) , color(color), ownerName(ownerName) {};
+	ChatMessage(std::string text, Type type, std::string color, std::string srcUser = "", std::string time = "", std::string dstUser = "")
+		: text(text), type(type) , color(color), srcUser(srcUser), time(time), dstUser(dstUser) {};
 
 
 	void Write(OutputMemoryStream& stream) {
 		stream << text;
 		stream << type;
-		stream << ownerName;
+		stream << srcUser;
+		stream << dstUser;
 		stream << time;
 		stream << color;
 	};
@@ -46,7 +48,8 @@ public:
 	void Read(const InputMemoryStream& stream) {
 		stream >> text;
 		stream >> type;
-		stream >> ownerName;
+		stream >> srcUser;
+		stream >> dstUser;
 		stream >> time;
 		stream >> color;
 	}
@@ -54,7 +57,8 @@ public:
 	std::string text;
 	Type type = Type::Unknown;
 	std::string color;
-	std::string ownerName;
+	std::string srcUser;
+	std::string dstUser;
 	std::string time;
 };
 

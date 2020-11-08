@@ -68,7 +68,7 @@ protected:
 	};
 
 	bool IsValidCommand(std::string command);
-
+	std::string GetTime();
 
 protected:
 
