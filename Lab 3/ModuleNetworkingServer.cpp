@@ -182,7 +182,6 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 		std::string commandName;
 		packet >> commandName;
-
 		if (commandName == "list")
 		{
 			std::string listOfUsers = "These are the users connected:\n\n";
@@ -191,8 +190,8 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 				listOfUsers += connectedSocket.playerName + "\n";
 			}
 
-			ChatMessage chatMessage(listOfUsers,ChatMessage::Type::Server);
-			
+			ChatMessage chatMessage(listOfUsers, ChatMessage::Type::Server);
+
 			OutputMemoryStream stream;
 			stream << ServerMessage::ChatMessage;
 			chatMessage.Write(stream);
@@ -231,16 +230,15 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 			}
 
-			for (auto& connectedSocket : connectedSockets)
-			{
-				std::string kickInformMessage = commandMessage.dstUser + " has been kicked by " + commandMessage.srcUser;
-				ChatMessage kickInform(kickInformMessage, ChatMessage::Type::Server);
-				OutputMemoryStream stream;
-				stream << ServerMessage::ChatMessage;
-				kickInform.Write(stream);
 
+			std::string kickInformMessage = commandMessage.dstUser + " has been kicked by " + commandMessage.srcUser;
+			ChatMessage kickInform(kickInformMessage, ChatMessage::Type::Server);
+			OutputMemoryStream stream;
+			stream << ServerMessage::ChatMessage;
+			kickInform.Write(stream);
+
+			for (auto& connectedSocket : connectedSockets) {
 				sendPacket(stream, connectedSocket.socket);
-
 			}
 
 		}
@@ -253,7 +251,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			// Send stream -----------
 			OutputMemoryStream stream;
 			stream << ServerMessage::ChatMessage;
-			
+
 			bool error = true;
 			for (auto& connectedSocket : connectedSockets)
 				if (connectedSocket.playerName == commandMessage.dstUser) {
@@ -264,10 +262,10 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 					// To Destination
 					sendPacket(stream, connectedSocket.socket);
 					break;
-					
+
 				}
 			if (error) {
-				ChatMessage errorMessage( "Whisper failed. User '" + commandMessage.dstUser + "' not found.\n" , ChatMessage::Type::Error, "Red");
+				ChatMessage errorMessage("Whisper failed. User '" + commandMessage.dstUser + "' not found.\n", ChatMessage::Type::Error, "Red");
 				errorMessage.Write(stream);
 				sendPacket(stream, s);
 			}
@@ -287,24 +285,22 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 			for (auto& connectedSocket : connectedSockets)
 			{
-				if (connectedSocket.socket == s) 
+				if (connectedSocket.socket == s)
 					connectedSocket.playerName = playerName;
 
 				sendPacket(stream, connectedSocket.socket);
 			}
-			
+
 		}
 
 		else if (commandName == "changeColor")
 		{
-		std::string playerName;
-		packet >> playerName;
+			std::string playerName;
+			packet >> playerName;
 
-		std::string playerColor;
-		packet >> playerColor;
+			std::string playerColor;
+			packet >> playerColor;
 
-		for (auto& connectedSocket : connectedSockets)
-		{
 			//Send the welcome message to everyone.
 			ChatMessage informMessage(("The user '" + playerName + "' now have the " + playerColor + " color!\n"),
 				ChatMessage::Type::Server);
@@ -312,12 +308,10 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			OutputMemoryStream stream;
 			stream << ServerMessage::ChatMessage;
 			informMessage.Write(stream);
-			sendPacket(stream, connectedSocket.socket);
+
+			for (auto& connectedSocket : connectedSockets)
+				sendPacket(stream, connectedSocket.socket);
 		}
-
-		}
-
-
 		break; }
 	default: {
 		break; }
