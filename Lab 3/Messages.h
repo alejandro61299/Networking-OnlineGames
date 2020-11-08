@@ -21,7 +21,8 @@ enum class DisconnectionType
 {
 	Error,
 	Exit,
-	NameExist
+	NameExist,
+	Kick
 };
 
 // Chat ---------------------------

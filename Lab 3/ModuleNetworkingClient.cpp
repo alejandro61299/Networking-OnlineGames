@@ -110,6 +110,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		chatMessages.push_back(chatMessage);
 		break; }
 	case ServerMessage::Disconnection: {
+		chatMessages.clear();
 		DisconnectionType type;
 		packet >> type;
 
@@ -125,6 +126,10 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		case DisconnectionType::NameExist:
 			ELOG("This name is not available! Try another one");
 			break;
+		case DisconnectionType::Kick:
+			LOG("You have been kicked :(");
+			break;
+
 		default:
 			break;
 		}
@@ -216,6 +221,12 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 		std::string whisperedUser = commandSplited[0];
 		ChatMessage commandMessage(whisperMessage, ChatMessage::Type::Command, playerColor, playerName, GetTime(), whisperedUser);
 		commandMessage.Write(stream); // Message
+	}
+	else if (commandName == "kick")
+	{
+		ChatMessage commandMessage("", ChatMessage::Type::Command, playerColor, playerName, GetTime(), commandParameters);
+		commandMessage.Write(stream); // Message
+		
 	}
 	else if (commandName == "help")
 	{

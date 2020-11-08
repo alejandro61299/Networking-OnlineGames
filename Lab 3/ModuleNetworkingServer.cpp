@@ -176,6 +176,46 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		}
 		else if (commandName == "kick")
 		{
+			ChatMessage commandMessage;
+			commandMessage.Read(packet);
+
+			bool finded = false;
+			for (auto& connectedSocket : connectedSockets)
+			{
+				if (connectedSocket.playerName == commandMessage.dstUser)
+				{
+					onSocketDisconnected(connectedSocket.socket, DisconnectionType::Kick);
+					finded = true;
+				}
+
+			}
+
+			if (!finded)
+			{
+				ChatMessage errorMessage(
+					std::string("El usuario " + commandMessage.dstUser + "no ha sido encontrado! \nRevise que lo haya escrito correctamente"),
+					ChatMessage::Type::Normal);
+				OutputMemoryStream stream;
+				stream << ServerMessage::ChatMessage;
+				errorMessage.Write(stream);
+
+				sendPacket(stream, s);
+
+				break;
+
+			}
+
+			for (auto& connectedSocket : connectedSockets)
+			{
+				std::string kickInformMessage = commandMessage.dstUser + " ha sido expulsado por " + commandMessage.srcUser;
+				ChatMessage kickInform(kickInformMessage, ChatMessage::Type::Normal);
+				OutputMemoryStream stream;
+				stream << ServerMessage::ChatMessage;
+				kickInform.Write(stream);
+
+				sendPacket(stream, connectedSocket.socket);
+
+			}
 
 		}
 		else if (commandName == "whisper")
@@ -250,7 +290,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 
 	}
 
-	if (t != DisconnectionType::NameExist) //If the problem is the name alredy exist, the user is not connected ate the eyes of the rest, so it's not necessary to send a message of disconnection.
+	if (t != DisconnectionType::NameExist && t != DisconnectionType::Kick) //If the problem is the name alredy exist, the user is not connected ate the eyes of the rest, so it's not necessary to send a message of disconnection.
 	{
 		// Send message of disconnection
 		for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
