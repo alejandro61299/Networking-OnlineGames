@@ -151,7 +151,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		// Send User by Join  ---------------------
 		OutputMemoryStream stream;
 		ChatMessage chatMessage("Give the welcome to " + playerName + "!!", ChatMessage::Type::Server);
-		stream << ServerMessage::InfoMessage;
+		stream << ServerMessage::ChatMessage;
 		chatMessage.Write(stream);
 
 		for (auto& connectedSocket : connectedSockets) {
@@ -194,7 +194,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			ChatMessage chatMessage(listOfUsers,ChatMessage::Type::Server);
 			
 			OutputMemoryStream stream;
-			stream << ServerMessage::InfoMessage;
+			stream << ServerMessage::ChatMessage;
 			chatMessage.Write(stream);
 
 			sendPacket(stream, s);
@@ -204,18 +204,18 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			ChatMessage commandMessage;
 			commandMessage.Read(packet);
 
-			bool finded = false;
+			bool found = false;
 			for (auto& connectedSocket : connectedSockets)
 			{
 				if (connectedSocket.playerName == commandMessage.dstUser)
 				{
 					onSocketDisconnected(connectedSocket.socket, DisconnectionType::Kick);
-					finded = true;
+					found = true;
 				}
 
 			}
 
-			if (!finded)
+			if (!found)
 			{
 				ChatMessage errorMessage(
 					std::string("The user " + commandMessage.dstUser + " has not been found! \nPlease, check if you have written it correctly."),
@@ -236,7 +236,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 				std::string kickInformMessage = commandMessage.dstUser + " has been kicked by " + commandMessage.srcUser;
 				ChatMessage kickInform(kickInformMessage, ChatMessage::Type::Server);
 				OutputMemoryStream stream;
-				stream << ServerMessage::InfoMessage;
+				stream << ServerMessage::ChatMessage;
 				kickInform.Write(stream);
 
 				sendPacket(stream, connectedSocket.socket);
@@ -263,6 +263,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 					sendPacket(stream, s);
 					// To Destination
 					sendPacket(stream, connectedSocket.socket);
+					break;
 					
 				}
 			if (error) {
@@ -279,16 +280,16 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			std::string playerName;
 			packet >> playerName;
 
+			ChatMessage informMessage(("The user '" + oldPlayerName + "' now is called '" + playerName + "'!\n"), ChatMessage::Type::Server);
+			OutputMemoryStream stream;
+			stream << ServerMessage::ChatMessage;
+			informMessage.Write(stream);
+
 			for (auto& connectedSocket : connectedSockets)
 			{
-				if (connectedSocket.socket == s) connectedSocket.playerName = playerName;
+				if (connectedSocket.socket == s) 
+					connectedSocket.playerName = playerName;
 
-				ChatMessage informMessage(("The user '" + oldPlayerName + "' now is called '" + playerName + "'!\n"),
-					ChatMessage::Type::Server);
-
-				OutputMemoryStream stream;
-				stream << ServerMessage::InfoMessage;
-				informMessage.Write(stream);
 				sendPacket(stream, connectedSocket.socket);
 			}
 			
@@ -309,7 +310,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 				ChatMessage::Type::Server);
 
 			OutputMemoryStream stream;
-			stream << ServerMessage::InfoMessage;
+			stream << ServerMessage::ChatMessage;
 			informMessage.Write(stream);
 			sendPacket(stream, connectedSocket.socket);
 		}
@@ -375,7 +376,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 			);
 
 			OutputMemoryStream stream;
-			stream << ServerMessage::InfoMessage;
+			stream << ServerMessage::ChatMessage;
 			chatMessage.Write(stream);
 			sendPacket(stream, currentSocket.socket);
 		}
