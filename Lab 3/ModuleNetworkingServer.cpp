@@ -194,7 +194,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			{
 				ChatMessage errorMessage(
 					std::string("El usuario " + commandMessage.dstUser + "no ha sido encontrado! \nRevise que lo haya escrito correctamente"),
-					ChatMessage::Type::Normal);
+					ChatMessage::Type::Error);
 				OutputMemoryStream stream;
 				stream << ServerMessage::ChatMessage;
 				errorMessage.Write(stream);
@@ -245,6 +245,30 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 				sendPacket(stream, s);
 			}
 		}
+		else if (commandName == "changeName")
+		{
+			std::string oldPlayerName;
+			packet >> oldPlayerName;
+
+			std::string playerName;
+			packet >> playerName;
+
+			for (auto& connectedSocket : connectedSockets)
+			{
+				if (connectedSocket.socket == s) connectedSocket.playerName = playerName;
+
+				//Send the welcome message to everyone.
+				ChatMessage informMessage(("el usuario '" + oldPlayerName + "' ahora se llama '" + playerName + "'\n"),
+					ChatMessage::Type::Normal);
+
+				OutputMemoryStream stream;
+				stream << ServerMessage::ChatMessage;
+				informMessage.Write(stream);
+				sendPacket(stream, connectedSocket.socket);
+			}
+			
+		}
+
 
 		break; }
 	default: {
@@ -267,6 +291,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 {
 
 	// Remove the connected socket from the list
+	bool exist = false;
 	std::string name;
 	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
@@ -284,13 +309,13 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 
 
 			connectedSockets.erase(it);
-
+			exist = true;
 			break;
 		}
 
 	}
 
-	if (t != DisconnectionType::NameExist && t != DisconnectionType::Kick) //If the problem is the name alredy exist, the user is not connected ate the eyes of the rest, so it's not necessary to send a message of disconnection.
+	if (t != DisconnectionType::NameExist && t != DisconnectionType::Kick && exist) //If the problem is the name alredy exist, the user is not connected ate the eyes of the rest, so it's not necessary to send a message of disconnection.
 	{
 		// Send message of disconnection
 		for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)

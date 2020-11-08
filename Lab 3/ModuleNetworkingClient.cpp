@@ -240,9 +240,22 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			"/kick [username]\n"
 			"/list\n"
 			"/whisper [username] [message]\n"
+			"/changeName [new username]\n"
 		);
 
 		chatMessages.push_back(chatMessage);
+	}
+	else if (commandName == "changeName")
+	{
+		std::vector<std::string> nameSplited = StrTool::Split(commandParameters, " ", 1);
+
+		if (nameSplited.size() >= 2 || nameSplited[0] == "") return; // Command Error Message
+		//std::string whisperMessage = StrTool::Trim(nameSplited[1]);
+
+		stream << playerName;
+		playerName = nameSplited[0];
+		stream << playerName;
+
 	}
 	// Other commands
 
