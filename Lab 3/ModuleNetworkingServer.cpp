@@ -130,9 +130,11 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 	case ClientMessage::ChatMessage: {
 
+		// Read stream -----------
 		ChatMessage chatMessage;
 		chatMessage.Read(packet);
 
+		// Send stream -----------
 		OutputMemoryStream stream;
 		stream << ServerMessage::ChatMessage;
 		chatMessage.Write(stream);
@@ -159,26 +161,30 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		}
 		else if (commandName == "whisper")
 		{
-			std::vector<std::string> usersToSend;
+			// Read stream -----------
 			ChatMessage commandMessage;
 			commandMessage.Read(packet);
-			usersToSend.push_back(commandMessage.srcUser);
-			usersToSend.push_back(commandMessage.dstUser);
 
+			// Send stream -----------
 			OutputMemoryStream stream;
 			stream << ServerMessage::ChatMessage;
-			commandMessage.Write(stream);
-
+			
+			bool error = true;
 			for (auto& connectedSocket : connectedSockets)
-			{
-				std::vector<std::string>::iterator it = std::find(usersToSend.begin(), usersToSend.end(), connectedSocket.playerName);
-				if (it != usersToSend.end()) {
+				if (connectedSocket.playerName == commandMessage.dstUser) {
+					error = false;
+					commandMessage.Write(stream);
+					// To Sourve
+					sendPacket(stream, s);
+					// To Destination
 					sendPacket(stream, connectedSocket.socket);
-					usersToSend.erase(it);
+					
 				}
-				if (usersToSend.empty()) break;
+			if (error) {
+				ChatMessage errorMessage( "Whisper failed. User '" + commandMessage.dstUser + "' not found " , ChatMessage::Type::Error);
+				errorMessage.Write(stream);
+				sendPacket(stream, s);
 			}
-		
 		}
 
 		break; }

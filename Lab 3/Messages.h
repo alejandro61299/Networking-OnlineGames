@@ -32,7 +32,7 @@ public:
 	};
 
 	ChatMessage() {};
-	ChatMessage(std::string text, Type type, std::string color, std::string srcUser = "", std::string time = "", std::string dstUser = "")
+	ChatMessage(std::string text, Type type, std::string color = "White", std::string srcUser = "", std::string time = "", std::string dstUser = "")
 		: text(text), type(type) , color(color), srcUser(srcUser), time(time), dstUser(dstUser) {};
 
 
