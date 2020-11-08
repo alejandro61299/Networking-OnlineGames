@@ -56,6 +56,18 @@ protected:
 		{"Navy"		, ImColor(0x000080)}
 	};
 
+	std::vector<std::string> commands =
+	{
+		"help",
+		"list",
+		"kick",
+		"whisper",
+		"changeName",
+		"changeColor",
+		"clear"
+	};
+
+	bool IsValidCommand(std::string command);
 
 
 protected:

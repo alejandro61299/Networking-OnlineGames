@@ -143,6 +143,19 @@ bool ModuleNetworking::cleanUp()
 	return true;
 }
 
+bool ModuleNetworking::IsValidCommand(std::string _command)
+{
+	for (auto& command : commands)
+	{
+		if (command == _command)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void ModuleNetworking::addSocket(SOCKET socket)
 {
 	sockets.push_back(socket);

@@ -127,6 +127,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			}
 		}
 		break; }
+
 	case ClientMessage::ChatMessage: {
 		ChatMessage chatMessage;
 		chatMessage.Read(packet);
@@ -138,7 +139,31 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			chatMessage.Write(stream);
 			sendPacket(stream, connectedSocket.socket);
 		}
+		break; }	
 
+	case ClientMessage::ChatCommand: {
+
+		std::string commandName;
+		packet >> commandName;
+		int commandWordsSize = 0;
+		packet >> commandWordsSize;
+		std::vector<std::string> commandWords;
+		
+		for (int i= 0; i < commandWordsSize; ++i)
+		{
+			std::string commandWord;
+			packet >> commandWord;
+			commandWords.push_back(commandWord);
+		}
+
+		if (commandName == "list")
+		{
+
+		}
+		else if (commandName == "kick")
+		{
+
+		}
 
 		break; }
 	default: {

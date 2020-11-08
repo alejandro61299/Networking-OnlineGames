@@ -65,27 +65,25 @@ bool ModuleNetworkingClient::gui()
 		ImGui::Image(tex->shaderResource, texSize);
 		ImGui::Spacing();
 
+		// Draw all messages 
 		for (auto& chatMessage : chatMessages) {
 			ImGui::Text(chatMessage.text.data());
 		}
 
-		static char buffer[100];
+		static std::string currentMessage;
+		char buffer[100] = "";
+		strcpy_s(buffer, currentMessage.c_str());
 		ImGui::InputText("Input", buffer, 100);
+		currentMessage.assign(buffer);
+
 
 		if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Enter))
 		{
-			ChatMessage chatMessage(
-				std::string(buffer),
-				ChatMessage::Type::Normal,
-				playerColor,
-				playerName,
-				"");
+			processInputText(currentMessage);
 
-
-			OutputMemoryStream stream;
-			stream << ClientMessage::ChatMessage;
-			chatMessage.Write(stream);
-			sendPacket(stream, _socket);
+			// Reset Message Input ---------
+			currentMessage.clear();
+			ImGui::SetKeyboardFocusHere(0);
 		}
 
 		ImGui::End();
@@ -119,4 +117,67 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 {
 	state = ClientState::Stopped;
+}
+
+void ModuleNetworkingClient::processInputText(const std::string &message )
+{
+	std::string currentMessage(StrTool::Trim(message) ); // Trim Message
+
+	if (currentMessage.empty()) { return; }
+	
+	OutputMemoryStream stream;
+
+	if (currentMessage[0] != '/')
+	{
+		// Send Message ----------------
+		ChatMessage chatMessage(currentMessage, ChatMessage::Type::Normal, playerColor, playerName, "");
+		chatMessage.type = ChatMessage::Type::Normal;
+		stream << ClientMessage::ChatMessage;
+		chatMessage.Write(stream);
+		sendPacket(stream, _socket);
+	}
+	else
+	{
+		// Prepare Command Line
+		std::string commandLine(StrTool::DeleteMultiSpacing(currentMessage));
+		commandLine.erase(0, 1); // Erase bar /
+
+		// Check Command Name
+		std::vector<std::string> commandWords = StrTool::Split(commandLine, " ");
+
+		if (!commandWords.empty() && IsValidCommand(commandWords[0])) {
+
+			// Execute Command Client ----------------
+			std::string commandName = commandWords[0];
+			commandWords.erase(commandWords.begin());
+			executeCommand(commandName, commandWords);
+
+			// Send Command to Server ----------------
+			stream << ClientMessage::ChatCommand;
+			stream << commandName;
+			stream << (int)commandWords.size();
+
+			for (auto& commandWord : commandWords)
+			{
+				stream << commandWord;
+			}
+
+			sendPacket(stream, _socket);
+		}
+	}
+}
+
+
+
+void ModuleNetworkingClient::executeCommand(std::string command, const std::vector<std::string>& words)
+{
+	if (command == "clear")
+	{
+		chatMessages.clear();
+	}
+	else if (command == "help")
+	{
+
+	}
+	// Other commands
 }

@@ -36,6 +36,10 @@ private:
 
 	void onSocketDisconnected(SOCKET socket) override;
 
+	void processInputText(const std::string& currentMessage);
+
+	void executeCommand(std::string command, const std::vector<std::string>& words);
+
 	//////////////////////////////////////////////////////////////////////
 	// Client state
 	//////////////////////////////////////////////////////////////////////
