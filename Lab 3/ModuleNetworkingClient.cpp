@@ -84,7 +84,7 @@ bool ModuleNetworkingClient::gui()
 					colors[chatMessage.color].x,
 					colors[chatMessage.color].y,
 					colors[chatMessage.color].z, 1),
-					std::string("[" + chatMessage.srcUser + " whispers]:").c_str());
+					std::string("[" + chatMessage.srcUser + " whispers to " + chatMessage.dstUser.data() + "]:").c_str());
 				ImGui::SameLine();
 				ImGui::Text(chatMessage.text.data());
 			}
@@ -335,11 +335,12 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 		}
 
 		if (colors.find(colorSplited[0]) != colors.end()) {
+			stream << playerName;
 			playerColor = colorSplited[0];
 			stream << playerColor;
 		}
 		else {
-			ChatMessage errorMessage("The color " + colorSplited[0] + " don't exist", ChatMessage::Type::Error, "Red");
+			ChatMessage errorMessage("The color " + colorSplited[0] + " doesn't exist", ChatMessage::Type::Error, "Red");
 			chatMessages.push_back(errorMessage);
 			return;
 		}
