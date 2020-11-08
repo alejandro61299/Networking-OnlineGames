@@ -145,16 +145,8 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 		std::string commandName;
 		packet >> commandName;
-		int commandWordsSize = 0;
-		packet >> commandWordsSize;
-		std::vector<std::string> commandWords;
-		
-		for (int i= 0; i < commandWordsSize; ++i)
-		{
-			std::string commandWord;
-			packet >> commandWord;
-			commandWords.push_back(commandWord);
-		}
+		std::string commandParameters;
+		packet >> commandParameters;
 
 		if (commandName == "list")
 		{

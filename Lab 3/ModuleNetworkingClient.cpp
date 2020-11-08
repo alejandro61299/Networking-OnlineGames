@@ -119,9 +119,9 @@ void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 	state = ClientState::Stopped;
 }
 
-void ModuleNetworkingClient::processInputText(const std::string &message )
+void ModuleNetworkingClient::processInputText(const std::string &originalMessage )
 {
-	std::string currentMessage(StrTool::Trim(message) ); // Trim Message
+	std::string currentMessage(StrTool::Trim(originalMessage) ); // Trim Message
 
 	if (currentMessage.empty()) { return; }
 	
@@ -143,21 +143,34 @@ void ModuleNetworkingClient::processInputText(const std::string &message )
 		commandLine.erase(0, 1); // Erase bar /
 
 		// Check Command Name
-		std::vector<std::string> commandWords = StrTool::Split(commandLine, " ");
+		std::vector<std::string> commandSplited = StrTool::Split(commandLine, " " , 2);
 
-		if (!commandWords.empty() && IsValidCommand(commandWords[0])) {
+		if (!commandSplited.empty() && IsValidCommand(commandSplited[0])) {
+	
+			std::string commandName = commandSplited[0];
+			std::string commandParameters("");
+
+			// Get Original Multispaced Params -------
+
+			if (commandSplited.size() > 1) {
+				std::string firstParamsWord = commandSplited[1];
+				std::string commandParameters("");
+
+				const auto strBegin = originalMessage.find(firstParamsWord);
+				const auto strEnd = originalMessage.find_last_not_of(" \t");
+				const auto strRange = strEnd - strBegin + 1;
+				commandParameters = originalMessage.substr(strBegin, strRange);
+			}
 
 			// Execute Command Client ----------------
-			std::string commandName = commandWords[0];
-			commandWords.erase(commandWords.begin());
-			executeCommand(commandName, commandWords);
+			executeCommand(commandName, commandParameters);
 
 			// Send Command to Server ----------------
 			stream << ClientMessage::ChatCommand;
 			stream << commandName;
-			stream << (int)commandWords.size();
+			stream << commandParameters;
 
-			for (auto& commandWord : commandWords)
+			for (auto& commandWord : commandSplited)
 			{
 				stream << commandWord;
 			}
@@ -169,7 +182,7 @@ void ModuleNetworkingClient::processInputText(const std::string &message )
 
 
 
-void ModuleNetworkingClient::executeCommand(std::string command, const std::vector<std::string>& words)
+void ModuleNetworkingClient::executeCommand(std::string command, std::string commandParameters)
 {
 	if (command == "clear")
 	{

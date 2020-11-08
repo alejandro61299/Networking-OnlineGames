@@ -60,15 +60,17 @@ public:
 
 namespace StrTool
 {
-	std::vector<std::string> Split(std::string s, std::string delimiter) {
+	std::vector<std::string> Split(std::string s, std::string delimiter, int maxSplits) {
 		size_t pos_start = 0, pos_end, delim_len = delimiter.length();
 		std::string token;
 		std::vector<std::string> res;
+		int currentSplit = 0;
 
-		while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+		while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos && currentSplit < maxSplits) {
 			token = s.substr(pos_start, pos_end - pos_start);
 			pos_start = pos_end + delim_len;
 			res.push_back(token);
+			++currentSplit;
 		}
 
 		res.push_back(s.substr(pos_start));
