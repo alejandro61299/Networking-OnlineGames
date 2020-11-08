@@ -160,7 +160,19 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 		if (commandName == "list")
 		{
+			std::string listOfUsers = "Estos son los usuairos conectados:\n\n";
+			for (auto& connectedSocket : connectedSockets)
+			{
+				listOfUsers += connectedSocket.playerName + "\n";
+			}
 
+			ChatMessage chatMessage;
+			chatMessage.text = listOfUsers;
+			OutputMemoryStream stream;
+			stream << ServerMessage::ChatMessage;
+			chatMessage.Write(stream);
+
+			sendPacket(stream, s);
 		}
 		else if (commandName == "kick")
 		{
@@ -257,24 +269,6 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 			chatMessage.Write(stream);
 			sendPacket(stream, currentSocket.socket);
 		}
-	}
-
-	if (t == DisconnectionType::Error)
-	{
-		// Send message of error to the user
-
-		ChatMessage chatMessage(
-			std::string(name + " se ha desconectado :_("),
-			ChatMessage::Type::Normal,
-			"",
-			name,
-			"");
-
-		OutputMemoryStream stream;
-		stream << ServerMessage::ChatMessage;
-		chatMessage.Write(stream);
-		sendPacket(stream, socket);
-
 	}
 }
 
