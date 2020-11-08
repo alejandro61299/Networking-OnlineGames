@@ -67,7 +67,32 @@ bool ModuleNetworkingClient::gui()
 
 		// Draw all messages 
 		for (auto& chatMessage : chatMessages) {
-			ImGui::Text(chatMessage.text.data());
+			if (chatMessage.type == ChatMessage::Type::Normal)
+			{
+				ImGui::TextColored(ImVec4(
+					colors[chatMessage.color].x, 
+					colors[chatMessage.color].y, 
+					colors[chatMessage.color].z, 1), 
+					std::string("[" + chatMessage.srcUser + "]:").c_str());
+				ImGui::SameLine();
+				ImGui::Text(chatMessage.text.data());
+
+			}
+			else if (chatMessage.type == ChatMessage::Type::Whisper)
+			{
+				ImGui::TextColored(ImVec4(
+					colors[chatMessage.color].x,
+					colors[chatMessage.color].y,
+					colors[chatMessage.color].z, 1),
+					std::string("[" + chatMessage.srcUser + "whispers]:").c_str());
+				ImGui::SameLine();
+				ImGui::Text(chatMessage.text.data());
+			}
+			else
+			{
+				ImGui::TextColored(ImVec4(colors[chatMessage.color].x, colors[chatMessage.color].y, colors[chatMessage.color].z, 1), chatMessage.text.data());
+
+			}
 		}
 
 		static std::string currentMessage;
@@ -103,8 +128,15 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		std::string userColor;
 		packet >> userColor;
 		playerColor = userColor;
-		break; }
+		ServerMessage test;
+		packet >> test;
+		 }
 	case ServerMessage::ChatMessage: {
+		ChatMessage chatMessage;
+		chatMessage.Read(packet);
+		chatMessages.push_back(chatMessage);
+		break; }
+	case ServerMessage::InfoMessage: {
 		ChatMessage chatMessage;
 		chatMessage.Read(packet);
 		chatMessages.push_back(chatMessage);
@@ -219,7 +251,7 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 
 		if (whisperMessage.find_first_not_of(' ') == std::string::npos) return; // Command Error Message
 		std::string whisperedUser = commandSplited[0];
-		ChatMessage commandMessage(whisperMessage, ChatMessage::Type::Command, playerColor, playerName, GetTime(), whisperedUser);
+		ChatMessage commandMessage(whisperMessage, ChatMessage::Type::Whisper, playerColor, playerName, GetTime(), whisperedUser);
 		commandMessage.Write(stream); // Message
 	}
 	else if (commandName == "kick")
@@ -242,6 +274,7 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			"/whisper [username] [message]\n"
 			"/changeName [new username]\n"
 		);
+		chatMessage.color = "White";
 
 		chatMessages.push_back(chatMessage);
 	}

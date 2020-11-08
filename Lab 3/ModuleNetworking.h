@@ -40,9 +40,9 @@ protected:
 	std::map<std::string, ImVec4> colors =
 	{
 		{"White"	, ImColor(0xFFFFFF)},
-		{"Red"		, ImColor(0xFF0000)},
+		{"Red"		, ImColor(0x0000FF)},
 		{"Lime"		, ImColor(0x00FF00)},
-		{"Blue"		, ImColor(0x0000FF)},
+		{"Blue"		, ImColor(0xFF0000)},
 		{"Yellow"	, ImColor(0xFFFF00)},
 		{"Cyan"		, ImColor(0x00FFFF)},
 		{"Magenta"	, ImColor(0xFF00FF)},

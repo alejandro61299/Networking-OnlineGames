@@ -128,10 +128,24 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 		for (auto& connectedSocket : connectedSockets)
 		{
-			if (connectedSocket.socket == s) connectedSocket.playerName = playerName;
+			OutputMemoryStream stream;
+			if (connectedSocket.socket == s) {
+				connectedSocket.playerName = playerName;
+
+				sendWelcomePacket(s, stream);
+			}
 
 			//Send the welcome message to everyone.
-			sendWelcomePacket(connectedSocket.socket, playerName);
+
+			ChatMessage chatMessage(
+				std::string("Dadle la bienvenida a " + playerName + "!!"),
+				ChatMessage::Type::Server 
+				);
+
+
+			stream << ServerMessage::InfoMessage;
+			chatMessage.Write(stream);
+			sendPacket(stream, connectedSocket.socket);
 		}
 		break; }
 
@@ -166,10 +180,10 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 				listOfUsers += connectedSocket.playerName + "\n";
 			}
 
-			ChatMessage chatMessage;
-			chatMessage.text = listOfUsers;
+			ChatMessage chatMessage(listOfUsers,ChatMessage::Type::Server);
+			
 			OutputMemoryStream stream;
-			stream << ServerMessage::ChatMessage;
+			stream << ServerMessage::InfoMessage;
 			chatMessage.Write(stream);
 
 			sendPacket(stream, s);
@@ -193,8 +207,9 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			if (!finded)
 			{
 				ChatMessage errorMessage(
-					std::string("El usuario " + commandMessage.dstUser + "no ha sido encontrado! \nRevise que lo haya escrito correctamente"),
-					ChatMessage::Type::Error);
+					std::string("El usuario " + commandMessage.dstUser + " no ha sido encontrado! \nRevise que lo haya escrito correctamente"),
+					ChatMessage::Type::Error,
+					"Red");
 				OutputMemoryStream stream;
 				stream << ServerMessage::ChatMessage;
 				errorMessage.Write(stream);
@@ -208,9 +223,9 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			for (auto& connectedSocket : connectedSockets)
 			{
 				std::string kickInformMessage = commandMessage.dstUser + " ha sido expulsado por " + commandMessage.srcUser;
-				ChatMessage kickInform(kickInformMessage, ChatMessage::Type::Normal);
+				ChatMessage kickInform(kickInformMessage, ChatMessage::Type::Server);
 				OutputMemoryStream stream;
-				stream << ServerMessage::ChatMessage;
+				stream << ServerMessage::InfoMessage;
 				kickInform.Write(stream);
 
 				sendPacket(stream, connectedSocket.socket);
@@ -240,7 +255,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 					
 				}
 			if (error) {
-				ChatMessage errorMessage( "Whisper failed. User '" + commandMessage.dstUser + "' not found " , ChatMessage::Type::Error);
+				ChatMessage errorMessage( "Whisper failed. User '" + commandMessage.dstUser + "' not found " , ChatMessage::Type::Error, "Red");
 				errorMessage.Write(stream);
 				sendPacket(stream, s);
 			}
@@ -259,10 +274,10 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 				//Send the welcome message to everyone.
 				ChatMessage informMessage(("el usuario '" + oldPlayerName + "' ahora se llama '" + playerName + "'\n"),
-					ChatMessage::Type::Normal);
+					ChatMessage::Type::Server);
 
 				OutputMemoryStream stream;
-				stream << ServerMessage::ChatMessage;
+				stream << ServerMessage::InfoMessage;
 				informMessage.Write(stream);
 				sendPacket(stream, connectedSocket.socket);
 			}
@@ -324,13 +339,11 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 
 			ChatMessage chatMessage(
 				std::string(name + " se ha desconectado :_("),
-				ChatMessage::Type::Normal,
-				"",
-				name,
-				"");
+				ChatMessage::Type::Server
+			);
 
 			OutputMemoryStream stream;
-			stream << ServerMessage::ChatMessage;
+			stream << ServerMessage::InfoMessage;
 			chatMessage.Write(stream);
 			sendPacket(stream, currentSocket.socket);
 		}
@@ -339,7 +352,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket, DisconnectionTy
 
 
 
-void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket, std::string name)
+void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket, OutputMemoryStream& stream)
 {
 
 	// ----------
@@ -350,20 +363,13 @@ void ModuleNetworkingServer::sendWelcomePacket(SOCKET socket, std::string name)
 		"******************************************\n");
 
 	// ----------
+	srand(time(NULL));
 	std::map<std::string, ImVec4>::iterator randomColor = colors.begin();
 	std::advance(randomColor, rand() % colors.size());
 
-	ChatMessage chatMessage(
-		std::string("Dadle la bienvenida a " + name + "!!"),
-		ChatMessage::Type::Normal,
-		randomColor->first,
-		name,
-		"");
 
-	OutputMemoryStream stream;
-	stream << ServerMessage::ChatMessage;
-	chatMessage.Write(stream);
-	sendPacket(stream, socket);
+	stream << ServerMessage::Welcome;
+	stream << randomColor->first;
 
 }
 

@@ -42,7 +42,7 @@ private:
 
 	void onSocketDisconnected(SOCKET socket, DisconnectionType t) override;
 
-	void sendWelcomePacket(SOCKET socket, std::string name);
+	void sendWelcomePacket(SOCKET socket, OutputMemoryStream& stream);
 
 
 	//////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ enum class ServerMessage
 {
 	Welcome,
 	ChatMessage,
+	InfoMessage,
 	Disconnection
 };
 
