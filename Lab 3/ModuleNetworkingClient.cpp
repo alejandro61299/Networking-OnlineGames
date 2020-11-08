@@ -84,7 +84,7 @@ bool ModuleNetworkingClient::gui()
 					colors[chatMessage.color].x,
 					colors[chatMessage.color].y,
 					colors[chatMessage.color].z, 1),
-					std::string("[" + chatMessage.srcUser + "whispers]:").c_str());
+					std::string("[" + chatMessage.srcUser + " whispers]:").c_str());
 				ImGui::SameLine();
 				ImGui::Text(chatMessage.text.data());
 			}
@@ -150,13 +150,13 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		switch (type)
 		{
 		case DisconnectionType::Error:
-			ELOG("An error ocurred! your connection with the server is lost");
+			ELOG("An error ocurred! your connection with the server is lost.");
 			break;
 		case DisconnectionType::Exit:
-			LOG("Yoy leave the chat");
+			LOG("Yoy leave the chat.");
 			break;
 		case DisconnectionType::NameExist:
-			ELOG("This name is not available! Try another one");
+			ELOG("This name is not available! Try another one.");
 			break;
 		case DisconnectionType::Kick:
 			LOG("You have been kicked :(");
@@ -246,7 +246,15 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 	{
 		std::vector<std::string> commandSplited = StrTool::Split(commandParameters, " ", 1);
 
-		if (commandSplited.size() < 2) return; // Command Error Message
+		if (commandSplited.size() < 2)
+		{
+			// Command Error Message
+
+			ChatMessage errorMessage("Put a message after the user.", ChatMessage::Type::Server, "Red");
+			chatMessages.push_back(errorMessage);
+
+			return;
+		}
 		std::string whisperMessage = StrTool::Trim(commandSplited[1]);
 
 		if (whisperMessage.find_first_not_of(' ') == std::string::npos) return; // Command Error Message
@@ -273,6 +281,8 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			"/list\n"
 			"/whisper [username] [message]\n"
 			"/changeName [new username]\n"
+			"/changeColor [new color]\n"
+			"/colors\n"
 		);
 		chatMessage.color = "White";
 
@@ -282,13 +292,69 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 	{
 		std::vector<std::string> nameSplited = StrTool::Split(commandParameters, " ", 1);
 
-		if (nameSplited.size() >= 2 || nameSplited[0] == "") return; // Command Error Message
-		//std::string whisperMessage = StrTool::Trim(nameSplited[1]);
+		if (nameSplited.size() >= 2 || nameSplited[0] == "")
+		{
+			// Command Error Message
+
+			if (nameSplited.size() >= 2)
+			{
+				ChatMessage errorMessage("The new name cannot have any space.", ChatMessage::Type::Server, "Red");
+				chatMessages.push_back(errorMessage);
+			}
+			else
+			{
+				ChatMessage errorMessage("Introduce a name.", ChatMessage::Type::Server, "Red");
+				chatMessages.push_back(errorMessage);
+			}
+			return; 
+		}
 
 		stream << playerName;
 		playerName = nameSplited[0];
 		stream << playerName;
 
+	}
+	else if (commandName == "changeColor")
+	{
+		std::vector<std::string> colorSplited = StrTool::Split(commandParameters, " ", 1);
+
+		if (colorSplited.size() >= 2 || colorSplited[0] == "") {
+			// Command Error Message
+
+			if (colorSplited.size() >= 2)
+			{
+				ChatMessage errorMessage("The color cannot have any space.", ChatMessage::Type::Server, "Red");
+				chatMessages.push_back(errorMessage);
+			}
+			else
+			{
+				ChatMessage errorMessage("Introduce a color.", ChatMessage::Type::Server, "Red");
+				chatMessages.push_back(errorMessage);
+			}
+			return;
+		}
+
+		if (colors.find(colorSplited[0]) != colors.end()) {
+			playerColor = colorSplited[0];
+			stream << playerColor;
+		}
+		else {
+			ChatMessage errorMessage("The color " + colorSplited[0] + " don't exist", ChatMessage::Type::Error, "Red");
+			chatMessages.push_back(errorMessage);
+			return;
+		}
+	}
+	else if (commandName == "colors")
+	{ 
+		std::string allColors = "These are the colors available:\n\n";
+		for (auto& color : colors)
+		{
+			allColors += color.first + "\n";
+		}
+
+		ChatMessage InfoMessage(allColors, ChatMessage::Type::Server);
+		chatMessages.push_back(InfoMessage);
+		return;
 	}
 	// Other commands
 

@@ -43,17 +43,17 @@ protected:
 		{"Red"		, ImColor(0x0000FF)},
 		{"Lime"		, ImColor(0x00FF00)},
 		{"Blue"		, ImColor(0xFF0000)},
-		{"Yellow"	, ImColor(0xFFFF00)},
-		{"Cyan"		, ImColor(0x00FFFF)},
+		{"Yellow"	, ImColor(0x00FFFF)},
+		{"Cyan"		, ImColor(0xFFFF00)},
 		{"Magenta"	, ImColor(0xFF00FF)},
 		{"Silver"	, ImColor(0xC0C0C0)},
 		{"Gray"		, ImColor(0x808080)},
-		{"Maroon"	, ImColor(0x800000)},
+		{"Maroon"	, ImColor(0x000080)},
 		{"Olive"	, ImColor(0x808000)},
 		{"Green"	, ImColor(0x008000)},
 		{"Purple"	, ImColor(0x800080)},
 		{"Teal"		, ImColor(0x008080)},
-		{"Navy"		, ImColor(0x000080)}
+		{"Navy"		, ImColor(0x800000)}
 	};
 
 	std::vector<std::string> commands =
@@ -64,6 +64,7 @@ protected:
 		"whisper",
 		"changeName",
 		"changeColor",
+		"colors",
 		"clear"
 	};
 
