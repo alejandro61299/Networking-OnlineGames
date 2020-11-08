@@ -296,6 +296,8 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 		else if (commandName == "changeColor")
 		{
+		std::string playerName;
+		packet >> playerName;
 
 		std::string playerColor;
 		packet >> playerColor;
@@ -303,7 +305,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		for (auto& connectedSocket : connectedSockets)
 		{
 			//Send the welcome message to everyone.
-			ChatMessage informMessage(("The user '" + connectedSocket.playerName + "' now have the " + playerColor + " color!\n"),
+			ChatMessage informMessage(("The user '" + playerName + "' now have the " + playerColor + " color!\n"),
 				ChatMessage::Type::Server);
 
 			OutputMemoryStream stream;
