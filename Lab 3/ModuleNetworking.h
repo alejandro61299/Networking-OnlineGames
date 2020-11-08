@@ -65,7 +65,8 @@ protected:
 		"changeName",
 		"changeColor",
 		"colors",
-		"clear"
+		"clear",
+		"exit"
 	};
 
 	bool IsValidCommand(std::string command);

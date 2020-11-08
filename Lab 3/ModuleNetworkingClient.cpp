@@ -109,8 +109,12 @@ bool ModuleNetworkingClient::gui()
 		ImGui::SameLine();
 		bool sendPressed = ImGui::Button("Send");
 		ImGui::SameLine(); 
-		if (ImGui::Button("Back")) {
-			DisconnectSocket(_socket, DisconnectionType::Exit);
+		if (ImGui::Button("Exit")) {
+			OutputMemoryStream stream;
+			stream << ClientMessage::ChatCommand;
+			stream << "exit";
+
+			sendPacket(stream, _socket);
 		}
 
 		if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Enter) || sendPressed)
@@ -290,6 +294,7 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			"/changeName [new username]\n"
 			"/changeColor [new color]\n"
 			"/colors\n"
+			"/exit\n"
 		);
 		chatMessage.color = "White";
 
@@ -352,6 +357,7 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			return;
 		}
 	}
+
 	else if (commandName == "colors")
 	{ 
 		std::string allColors = "These are the colors available:\n\n";

@@ -316,7 +316,13 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 			for (auto& connectedSocket : connectedSockets)
 				sendPacket(stream, connectedSocket.socket);
 		}
+		else if (commandName == "exit")
+		{
+		onSocketDisconnected(s, DisconnectionType::Exit);
+		}
 		break; }
+
+		
 	default: {
 		break; }
 	}
