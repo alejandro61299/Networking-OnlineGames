@@ -60,10 +60,14 @@ bool ModuleNetworkingClient::gui()
 	{
 		ImGui::Begin("Client Window");
 
+		// Texture -----------------------------
+
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 		ImGui::Spacing();
+
+		// Chat Scoller  ------------------------
 
 		// Draw all messages 
 		for (auto& chatMessage : chatMessages) {
@@ -126,9 +130,11 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET s, const InputMemoryStr
 	{
 	case ServerMessage::Welcome: {
 		packet >> playerColor;
-		ChatMessage welcomeMessage;
-		welcomeMessage.Read(packet);
-		chatMessages.push_back(welcomeMessage);
+		ChatMessage message;
+		message.Read(packet);
+		chatMessages.push_back(message);
+		message.Read(packet);
+		chatMessages.push_back(message);
 		break; }
 	case ServerMessage::ChatMessage: {
 		ChatMessage chatMessage;

@@ -126,7 +126,9 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 
 		// Find User by name ---------------------
 		for (auto& connectedSocket : connectedSockets)
+		{
 			if (connectedSocket.socket == s) {
+
 				connectedSocket.playerName = playerName; //Set Name in the server
 				// Send Welcome to New User 
 				OutputMemoryStream stream;
@@ -136,28 +138,30 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 				std::map<std::string, ImVec4>::iterator randomColor = colors.begin();
 				std::advance(randomColor, rand() % colors.size());
 				stream << randomColor->first;
-				// Send message 
+				// Send message to New User
 				ChatMessage welcomeMessage(
 					"------------------------------------------\n"
 					"			 WELCOME TO THE CHAT	       \n"
 					" Type /help to see the available commands \n"
 					"------------------------------------------\n",
 					ChatMessage::Type::Server);
+				ChatMessage joinMessage("Give the welcome to " + playerName + "!!", ChatMessage::Type::Server);
 				welcomeMessage.Write(stream);
+				joinMessage.Write(stream);
 				sendPacket(stream, connectedSocket.socket);
+
+				// Send User Join  to everyone ---------------------
+				OutputMemoryStream stream_2;
+				stream_2 << ServerMessage::ChatMessage;
+				joinMessage.Write(stream_2);
+
+				for (auto& connectedSocket : connectedSockets) {
+					if (connectedSocket.playerName != playerName)
+						sendPacket(stream_2, connectedSocket.socket);
+				}
 				break;
 			}
-
-		// Send User by Join  ---------------------
-		OutputMemoryStream stream;
-		ChatMessage chatMessage("Give the welcome to " + playerName + "!!", ChatMessage::Type::Server);
-		stream << ServerMessage::ChatMessage;
-		chatMessage.Write(stream);
-
-		for (auto& connectedSocket : connectedSockets) {
-			sendPacket(stream, connectedSocket.socket);
 		}
-
 		break; }
 
 	case ClientMessage::ChatMessage: {
