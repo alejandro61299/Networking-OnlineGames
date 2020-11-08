@@ -60,14 +60,11 @@ bool ModuleNetworkingClient::gui()
 	{
 		ImGui::Begin("Client Window");
 
-		// Texture -----------------------------
+		// Chat Scroller  ------------------------
 
-		Texture *tex = App->modResources->client;
-		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
-		ImGui::Image(tex->shaderResource, texSize);
-		ImGui::Spacing();
+		float height = ImGui::GetWindowHeight();
 
-		// Chat Scoller  ------------------------
+		ImGui::BeginChild("   ", ImVec2(0, height*0.92));
 
 		// Draw all messages 
 		for (auto& chatMessage : chatMessages) {
@@ -99,14 +96,24 @@ bool ModuleNetworkingClient::gui()
 			}
 		}
 
+		ImGui::EndChild();
+
+		// Chat Inputs ------------------------------
+
 		static std::string currentMessage;
 		char buffer[100] = "";
 		strcpy_s(buffer, currentMessage.c_str());
-		ImGui::InputText("Input", buffer, 100);
+		ImGui::InputText("##Input", buffer, 100);
 		currentMessage.assign(buffer);
 
+		ImGui::SameLine();
+		bool sendPressed = ImGui::Button("Send");
+		ImGui::SameLine(); 
+		if (ImGui::Button("Back")) {
+			DisconnectSocket(_socket, DisconnectionType::Exit);
+		}
 
-		if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Enter))
+		if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Enter) || sendPressed)
 		{
 			processInputText(currentMessage);
 
