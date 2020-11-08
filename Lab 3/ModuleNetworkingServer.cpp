@@ -143,7 +143,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 					"------------------------------------------\n"
 					"			 WELCOME TO THE CHAT	       \n"
 					" Type /help to see the available commands \n"
-					"------------------------------------------\n",
+					"------------------------------------------",
 					ChatMessage::Type::Server);
 				ChatMessage joinMessage("Give the welcome to " + playerName + "!!", ChatMessage::Type::Server);
 				welcomeMessage.Write(stream);
@@ -188,11 +188,12 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET s, const InputMemoryStr
 		packet >> commandName;
 		if (commandName == "list")
 		{
-			std::string listOfUsers = "These are the users connected:\n\n";
+			std::string listOfUsers = "-------------- Users List -------------\n\n";
 			for (auto& connectedSocket : connectedSockets)
 			{
 				listOfUsers += connectedSocket.playerName + "\n";
 			}
+			listOfUsers += "\n-----------------------------------------";
 
 			ChatMessage chatMessage(listOfUsers, ChatMessage::Type::Server);
 

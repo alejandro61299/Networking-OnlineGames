@@ -91,9 +91,11 @@ bool ModuleNetworkingClient::gui()
 			}
 			else
 			{
-				ImGui::TextColored(ImVec4(colors[chatMessage.color].x, colors[chatMessage.color].y, colors[chatMessage.color].z, 1), chatMessage.text.data());
 
+				ImGui::TextColored(ImVec4(colors[chatMessage.color].x, colors[chatMessage.color].y, colors[chatMessage.color].z, 1), chatMessage.text.data());
+				ImGui::Spacing();
 			}
+			ImGui::Spacing();
 		}
 
 		ImGui::EndChild();
@@ -279,9 +281,9 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 	{
 		ChatMessage chatMessage;
 
-		chatMessage.type = ChatMessage::Type::Command;
+		chatMessage.type = ChatMessage::Type::Server;
 		chatMessage.text.assign(
-			"----- Commands List ------\n"
+			"-------------- Commands List ------------\n\n"
 			"/clear\n"
 			"/help\n"
 			"/kick [username]\n"
@@ -289,7 +291,8 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			"/whisper [username] [message]\n"
 			"/changeName [new username]\n"
 			"/changeColor [new color]\n"
-			"/colors\n"
+			"/colors\n\n"
+			"-----------------------------------------"
 		);
 		chatMessage.color = "White";
 
@@ -354,11 +357,12 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 	}
 	else if (commandName == "colors")
 	{ 
-		std::string allColors = "These are the colors available:\n\n";
+	std::string allColors = "-------------- Colors List -------------\n\n";
 		for (auto& color : colors)
 		{
 			allColors += color.first + "\n";
 		}
+		allColors += "\n-----------------------------------------";
 
 		ChatMessage InfoMessage(allColors, ChatMessage::Type::Server);
 		chatMessages.push_back(InfoMessage);
