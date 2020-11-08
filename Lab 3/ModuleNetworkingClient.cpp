@@ -111,8 +111,12 @@ bool ModuleNetworkingClient::gui()
 		ImGui::SameLine();
 		bool sendPressed = ImGui::Button("Send");
 		ImGui::SameLine(); 
-		if (ImGui::Button("Back")) {
-			DisconnectSocket(_socket, DisconnectionType::Exit);
+		if (ImGui::Button("Exit")) {
+			OutputMemoryStream stream;
+			stream << ClientMessage::ChatCommand;
+			stream << "exit";
+
+			sendPacket(stream, _socket);
 		}
 
 		if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Enter) || sendPressed)
@@ -291,7 +295,8 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			"/whisper [username] [message]\n"
 			"/changeName [new username]\n"
 			"/changeColor [new color]\n"
-			"/colors\n\n"
+			"/colors\n"
+			"/exit\n\n"
 			"-----------------------------------------"
 		);
 		chatMessage.color = "White";
@@ -355,6 +360,7 @@ void ModuleNetworkingClient::executeCommand(std::string commandName, std::string
 			return;
 		}
 	}
+
 	else if (commandName == "colors")
 	{ 
 	std::string allColors = "-------------- Colors List -------------\n\n";
