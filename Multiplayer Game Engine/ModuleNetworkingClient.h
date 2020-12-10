@@ -109,7 +109,16 @@ private:
 	// Latency management
 	//////////////////////////////////////////////////////////////////////
 
+	enum  class UpdateMask: int8 {
+		Position = 0x00,
+		Rotation = 0x01,
+		Scale = 0x02,
+	};
+
+
+
 	// TODO(you): Latency management lab session
+
 
 };
 

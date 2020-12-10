@@ -133,6 +133,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	{
 		// TODO(you): World state replication lab session
 
+
+
 		// TODO(you): Reliability on top of UDP lab session
 	}
 }

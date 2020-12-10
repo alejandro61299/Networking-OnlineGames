@@ -124,9 +124,7 @@ private:
 	uint16 listenPort = 0;
 
 
-
 	// TODO(done): UDP virtual connection lab session
-
 	float secondsSinceLastPingDelivery = 0.0f;
 
 };
