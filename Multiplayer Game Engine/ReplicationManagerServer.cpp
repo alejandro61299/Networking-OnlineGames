@@ -41,6 +41,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		else if (action == ReplicationAction::Destroy)
 		{
 			item = actions.erase(item);
+			// TODO(you): BORRAR OBJECT
 			continue;
 		}
 

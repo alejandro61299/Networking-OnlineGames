@@ -168,8 +168,8 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 		int behaviourType = 0;
 		packet >> behaviourType;
 
-		if (behaviourType != -1) {
-
+		if (behaviourType != -1) 
+		{
 			if (behaviour == nullptr)
 			{
 				behaviour = App->modBehaviour->addBehaviour((BehaviourType)behaviourType, this);

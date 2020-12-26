@@ -57,7 +57,8 @@ struct GameObject
 
 	int updateFlags = (int)UpdateFlags::NONE;
 
-	bool HasUpdateFlag(UpdateFlags flag) { return 0 != (updateFlags & (int)flag); }
+	//bool HasUpdateFlag(UpdateFlags flag) { return 0 != (updateFlags & (int)flag); } 
+	bool HasUpdateFlag(UpdateFlags flag) { return true; }
 	void SetUpdateFlag(UpdateFlags flag) { ( updateFlags ) |= (int)flag; }
 	void UnsetUpdateFlag(UpdateFlags flag) { updateFlags &= ~(int)flag; }
 

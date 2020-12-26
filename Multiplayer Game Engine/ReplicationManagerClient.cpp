@@ -33,9 +33,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 		{
 			gameObject = App->modLinkingContext->getNetworkGameObject(id);
 
-			if (gameObject == nullptr)
-				action = (int)ReplicationAction::Create;
-			else
+			if (gameObject != nullptr)
 				gameObject->read(packet, true);
 		}
 		if (action == (int)ReplicationAction::Create)
