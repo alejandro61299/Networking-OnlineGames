@@ -34,10 +34,9 @@ private:
 	class TaskLoadTexture : public Task
 	{
 	public:
-
+		int id = 0;
 		const char *filename = nullptr;
 		Texture **texture = nullptr;
-
 		void execute() override;
 	};
 

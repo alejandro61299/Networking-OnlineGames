@@ -1,5 +1,20 @@
 #pragma once
 
+
+enum class UpdateFlags : int {
+	NONE		= 0,
+	POSITION	= (1 << 0),
+	ROTATION	= (1 << 1),
+	SIZE		= (1 << 2),
+	SPRITE		= (1 << 3),
+	ANIMATION	= (1 << 4),
+	COLLIDER	= (1 << 5),
+	BEHAVIOUR	= (1 << 6),
+	TAG			= (1 << 7),
+};
+
+
+
 struct GameObject
 {
 	uint32 id;
@@ -37,6 +52,20 @@ struct GameObject
 		STATE_COUNT
 	};
 	State state = NON_EXISTING;
+
+	// Update flags
+
+	int updateFlags = (int)UpdateFlags::NONE;
+
+	bool HasUpdateFlag(UpdateFlags flag) { return 0 != (updateFlags & (int)flag); }
+	void SetUpdateFlag(UpdateFlags flag) { ( updateFlags ) |= (int)flag; }
+	void UnsetUpdateFlag(UpdateFlags flag) { updateFlags &= ~(int)flag; }
+
+public :
+
+	void write(OutputMemoryStream& packet, const bool useFlags);
+	void read(const InputMemoryStream& packet  , const bool useFlags);
+
 
 private:
 

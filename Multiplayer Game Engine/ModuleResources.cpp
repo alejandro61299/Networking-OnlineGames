@@ -5,7 +5,8 @@
 
 void ModuleResources::TaskLoadTexture::execute()
 {
-	*texture = App->modTextures->loadTexture(filename);
+	(*texture) = App->modTextures->loadTexture(filename);
+	(*texture)->id = id;
 }
 
 #endif
@@ -48,10 +49,11 @@ void ModuleResources::loadTextureAsync(const char * filename, Texture **textureP
 {
 	ASSERT(taskCount < MAX_RESOURCES);
 	
-	TaskLoadTexture *task = &tasks[taskCount++];
+	TaskLoadTexture *task = &tasks[taskCount];
 	task->owner = this;
 	task->filename = filename;
 	task->texture = texturePtrAddress;
+	task->id = taskCount++; // Hardcode texture ID problem
 
 	App->modTaskManager->scheduleTask(task, this);
 }

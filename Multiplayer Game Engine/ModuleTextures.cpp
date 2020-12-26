@@ -1,4 +1,5 @@
 #include "Networks.h"
+#include "ModuleTextures.h"
 
 
 extern ID3D11Device *g_pd3dDevice;
@@ -19,6 +20,7 @@ bool ModuleTextures::cleanUp()
 			texture.filename = "";
 			texture.size = vec2{ -1.0f , -1.0f };
 			texture.used = false;
+			texture.id = 0;
 		}
 	}
 
@@ -74,6 +76,7 @@ void ModuleTextures::freeTexture(Texture* tex)
 				texture.filename = "";
 				texture.size = vec2{ -1.0f, -1.0f };
 				texture.used = false;
+				texture.id = 0;
 				break;
 			}
 		}
@@ -186,4 +189,18 @@ Texture & ModuleTextures::getTextureSlotForFilename(const char *filename)
 	// Else... add a new texture slot
 	static Texture texture;
 	return texture;
+}
+
+
+Texture* ModuleTextures::getTextureById(const int id)
+{
+	for (auto& texture : _textures)
+	{
+		if (texture.id == id)
+		{
+			return &texture;
+		}
+	}
+
+	return nullptr;
 }
