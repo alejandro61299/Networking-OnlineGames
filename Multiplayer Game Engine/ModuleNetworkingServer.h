@@ -53,7 +53,7 @@ private:
 		// TODO(done): UDP virtual connection lab session
 		double lastPacketRecivedTime = 0.0f;
 
-		// TODO(you): World state replication lab session
+		// TODO(done): World state replication lab session
 		float secondsSinceLastReplication = 0;
 		ReplicationManagerServer replicationServer;
 
