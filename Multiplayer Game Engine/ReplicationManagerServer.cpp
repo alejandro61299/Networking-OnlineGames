@@ -18,11 +18,15 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 	actions[networkId] = ReplicationAction::Destroy;
 }
 
-void ReplicationManagerServer::write(OutputMemoryStream& packet)
+void ReplicationManagerServer::write(OutputMemoryStream& packet, uint32 LastInputRecivied)
 {
 	packet << PROTOCOL_ID;
 	packet << ServerMessage::Replication;
 	packet << actions.size();
+
+	// TODO(you): Reliability on top of UDP lab session
+	//Send the last input processed
+	packet << LastInputRecivied;
 
 
 	for (auto item = actions.begin(); item != actions.end();) 

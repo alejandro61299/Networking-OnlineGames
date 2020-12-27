@@ -11,7 +11,7 @@ public:
     void create(uint32 networkId);
     void update(uint32 networkId);
     void destroy(uint32 networkId);
-    void write(OutputMemoryStream& packet);
+    void write(OutputMemoryStream& packet, uint32 LastInputRecivied);
 
 private:
     std::unordered_map<uint32, ReplicationAction> actions;

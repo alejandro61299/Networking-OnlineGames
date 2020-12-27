@@ -148,7 +148,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				}
 
 				OutputMemoryStream packet;
-				proxy->replicationServer.write(packet);
+				proxy->replicationServer.write(packet, proxy->lastInputRecived);
 				sendPacket(packet, fromAddress);
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -168,7 +168,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			// Process the input packet and update the corresponding game object
 			if (proxy != nullptr && IsValid(proxy->gameObject))
 			{
-				// TODO(you): Reliability on top of UDP lab session
+				
 
 				// Read input data
 				while (packet.RemainingByteCount() > 0)
@@ -187,7 +187,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						proxy->gameObject->behaviour->onInput(proxy->gamepad);
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
 					}
+
+					// TODO(you): Reliability on top of UDP lab session (DONE)
+					proxy->lastInputRecived = inputData.sequenceNumber;
 				}
+
 			}
 		}
 
@@ -263,10 +267,12 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(done): World state replication lab session   !! ADD INTERVALS , CURRENTLY IS SENT EVERY FRAME !!
 				OutputMemoryStream packet;
-				clientProxy.replicationServer.write(packet);
+				clientProxy.replicationServer.write(packet, clientProxy.lastInputRecived);
+
+
 				sendPacket(packet, clientProxy.address);
 
-				// TODO(you): Reliability on top of UDP lab session
+
 			}
 		}
 	}

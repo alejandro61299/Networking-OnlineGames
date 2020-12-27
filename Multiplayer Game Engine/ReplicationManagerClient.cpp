@@ -3,10 +3,12 @@
 
 // TODO(done): World state replication lab session
 
-void ReplicationManagerClient::read(const InputMemoryStream& packet)
+void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& lastInputRecivied)
 {
 	size_t num;
 	packet >> num;
+
+	packet >> lastInputRecivied;
 
 	for (int i = 0; i < num; ++i)
 	{
