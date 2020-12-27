@@ -5,12 +5,12 @@
 
 void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& lastInputRecivied)
 {
-	size_t num;
-	packet >> num;
+	size_t size;
+	packet >> size;
 
 	packet >> lastInputRecivied;
 
-	for (int i = 0; i < num; ++i)
+	for (int i = 0; i < size; ++i)
 	{
 		uint32 id = 0;
 		packet >> id;

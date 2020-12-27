@@ -136,7 +136,7 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 			explosion->position = position;
 			explosion->size = vec2{ size, size };
 			explosion->angle = 365.0f * Random.next();
-
+			explosion->tag = 4;
 			explosion->sprite = App->modRender->addSprite(explosion);
 			explosion->sprite->texture = App->modResources->explosion1;
 			explosion->sprite->order = 100;

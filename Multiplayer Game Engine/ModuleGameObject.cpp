@@ -44,12 +44,13 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ANIMATION)))
 	{
 		if (animation != nullptr && animation->clip != nullptr) {
+			packet << true;
 			packet << animation->clip->id;
 			packet << animation->currentFrame;
 			packet << animation->elapsedTime;
 		}
 		else {
-			packet << -1;
+			packet << false;
 		}
 	}	
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::COLLIDER)))
@@ -57,7 +58,7 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 		if (collider != nullptr)
 		{
 			packet << true;
-			packet << (int)collider->type;
+			packet << collider->type;
 			packet << collider->isTrigger;
 		}
 		else
@@ -70,11 +71,12 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 	{
 		if (behaviour != nullptr)
 		{
-			packet << (int)behaviour->type();
+			packet << true;
+			packet << behaviour->type();
 			behaviour->write(packet);
 		}
 		else {
-			packet << -1;
+			packet << false;
 		}
 	}	
 }
@@ -127,18 +129,19 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ANIMATION)))
 	{
-		int animationID = -1;
-		packet >> animationID;
+		bool hasAnimation = false;
+		packet >> hasAnimation;
 
-		if (animationID != -1) {
+		if (hasAnimation) 
+		{
 			if (animation == nullptr)
 			{
 				animation = App->modRender->addAnimation(this);
 			}
 
-			uint16 clipID;
-			packet >> clipID;
-			animation->clip = App->modRender->getAnimationClip(clipID);
+			uint16 clipId = 0;
+			packet >> clipId;
+			animation->clip = App->modRender->getAnimationClip(clipId);
 			packet >> animation->currentFrame;
 			packet >> animation->elapsedTime;
 		}
@@ -148,32 +151,35 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 		bool hasCollider = false;
 		packet >> hasCollider;
 
-		if (hasCollider == true)
+		if (hasCollider)
 		{
-			int colliderType = -1;
+			ColliderType colliderType = ColliderType::None;
 			packet >> colliderType;
 
 			if (collider == nullptr)
 			{
-				collider = App->modCollision->addCollider((ColliderType)colliderType, this);
+				collider = App->modCollision->addCollider(colliderType, this);
 			}
 
-			collider->type = (ColliderType)colliderType;
 			packet >> collider->isTrigger;
 		}
 	}
 
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::BEHAVIOUR)))
 	{
-		int behaviourType = 0;
-		packet >> behaviourType;
+		bool hasBehaviour = false;
+		packet >> hasBehaviour;
 
-		if (behaviourType != -1) 
-		{
+		if (hasBehaviour)
+		{ 
+			BehaviourType behaviourType = BehaviourType::None;
+			packet >> behaviourType;
+
 			if (behaviour == nullptr)
 			{
-				behaviour = App->modBehaviour->addBehaviour((BehaviourType)behaviourType, this);
+				behaviour = App->modBehaviour->addBehaviour(behaviourType, this);
 			}
+
 			behaviour->read(packet);
 		}
 	}
