@@ -225,16 +225,18 @@ void ModuleNetworkingServer::onUpdate()
 			}
 		}
 
+		// Prepare Ping Packet ----------------------------
+
 		bool needToSendPing = false;
 		secondsSinceLastPingDelivery += Time.deltaTime;
 
-		OutputMemoryStream packet;
+		OutputMemoryStream packetPing;
 		if (secondsSinceLastPingDelivery > PING_INTERVAL_SECONDS)
 		{
-			packet << PROTOCOL_ID;
-			packet << ClientMessage::Ping;
+			packetPing << PROTOCOL_ID;
+			packetPing << ClientMessage::Ping;
 			needToSendPing = true;
-			secondsSinceLastPingDelivery = 0.f;
+			secondsSinceLastPingDelivery = secondsSinceLastPingDelivery - PING_INTERVAL_SECONDS;
 		}
 
 		for (ClientProxy &clientProxy : clientProxies)
@@ -246,13 +248,11 @@ void ModuleNetworkingServer::onUpdate()
 				// Send Ping -----------------------------------
 				if (needToSendPing == true) 
 				{
-					sendPacket(packet, clientProxy.address);
+					sendPacket(packetPing, clientProxy.address);
 				}
 
 				// Time to Disconnect  -------------------------
-
 				clientProxy.lastPacketRecivedTime += Time.deltaTime;
-
 				if (clientProxy.lastPacketRecivedTime > DISCONNECT_TIMEOUT_SECONDS)
 				{
 					destroyClientProxy(&clientProxy);
@@ -266,13 +266,17 @@ void ModuleNetworkingServer::onUpdate()
 				}
 
 				// TODO(done): World state replication lab session   !! ADD INTERVALS , CURRENTLY IS SENT EVERY FRAME !!
-				OutputMemoryStream packet;
-				clientProxy.replicationServer.write(packet, clientProxy.lastInputRecived);
+				// World Replication -------------------------
+				clientProxy.secondsSinceLastReplication += Time.deltaTime;
+				float timeInterval = 0.1f;
 
-
-				sendPacket(packet, clientProxy.address);
-
-
+				if (clientProxy.secondsSinceLastReplication > timeInterval)
+				{
+					OutputMemoryStream packetReplication;
+					clientProxy.replicationServer.write(packetReplication, clientProxy.lastInputRecived);
+					sendPacket(packetReplication, clientProxy.address);
+					clientProxy.secondsSinceLastReplication = clientProxy.secondsSinceLastReplication - timeInterval;
+				}
 			}
 		}
 	}
