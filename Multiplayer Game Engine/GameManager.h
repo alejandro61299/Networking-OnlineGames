@@ -20,7 +20,7 @@ private:
 	void enableInputPlayers(const bool);
 
 	GameState gameState = GameState::None;
-	ClientProxy* crownOwner = nullptr;
+	ClientProxy* gemstoneOwner = nullptr;
 	ClientProxy* winner = nullptr;
 	int minPlayers = 2;
 };

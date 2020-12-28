@@ -45,13 +45,13 @@ int GameManager::getNumPlayers()
 
 void GameManager::enableInputPlayers(const bool value) 
 {
-	for (auto& client : App->modNetServer->clientProxies)
+	for (ClientProxy& client : App->modNetServer->clientProxies)
 	{
 		if (client.connected && client.gameObject != nullptr)
 		{
 			Spaceship* spaceship = (Spaceship*)client.gameObject->behaviour;
 			spaceship->enableInput = value;
-			NetworkUpdate(client.gameObject);
+			//NetworkUpdate(client.gameObject);
 		}
 	}
 }
