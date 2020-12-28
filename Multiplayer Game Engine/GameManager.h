@@ -22,5 +22,5 @@ private:
 	GameState gameState = GameState::None;
 	ClientProxy* gemstoneOwner = nullptr;
 	ClientProxy* winner = nullptr;
-	int minPlayers = 2;
+	int minPlayers = 1;
 };

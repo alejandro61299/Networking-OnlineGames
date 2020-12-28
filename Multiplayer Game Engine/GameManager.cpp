@@ -35,7 +35,7 @@ int GameManager::getNumPlayers()
 
 	for (auto& client : App->modNetServer->clientProxies)
 	{
-		if (client.connected)
+		if (client.connected && client.gameObject != nullptr && client.gameObject->state != GameObject::State::INSTANTIATE)
 		{
 			++connectedPlayers;
 		}
