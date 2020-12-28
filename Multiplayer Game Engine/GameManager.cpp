@@ -16,9 +16,12 @@ void GameManager::update()
 	case GameState::WaitingPlayers:
 		if (getNumPlayers() >= minPlayers)
 		{
-			enableInputPlayers(true);
-			gameState = GameState::InGame;
+			gameState = GameState::Start;
 		}
+		break;
+	case GameState::Start:
+		enableInputPlayers(true);
+		gameState = GameState::InGame;
 		break;
 	case GameState::InGame:
 		break;
@@ -35,7 +38,7 @@ int GameManager::getNumPlayers()
 
 	for (auto& client : App->modNetServer->clientProxies)
 	{
-		if (client.connected && client.gameObject != nullptr && client.gameObject->state != GameObject::State::INSTANTIATE)
+		if (client.connected && client.gameObject != nullptr)
 		{
 			++connectedPlayers;
 		}
@@ -51,7 +54,8 @@ void GameManager::enableInputPlayers(const bool value)
 		{
 			Spaceship* spaceship = (Spaceship*)client.gameObject->behaviour;
 			spaceship->enableInput = value;
-			//NetworkUpdate(client.gameObject);
+
+			NetworkUpdate(client.gameObject);
 		}
 	}
 }

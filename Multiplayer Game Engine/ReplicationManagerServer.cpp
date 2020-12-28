@@ -10,7 +10,15 @@ void ReplicationManagerServer::create(uint32 networkId)
 
 void ReplicationManagerServer::update(uint32 networkId)
 {
-	actions[networkId] = ReplicationAction::Update;
+	if (actions.find(networkId) != actions.end())
+	{
+		if (actions[networkId] == ReplicationAction::Create || actions[networkId] == ReplicationAction::Destroy)
+		{
+			return;
+		}
+
+		actions[networkId] = ReplicationAction::Update;
+	}
 }
 
 void ReplicationManagerServer::destroy(uint32 networkId)
@@ -56,7 +64,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ClientProxy &pr
 		if (action == ReplicationAction::Create)
 		{
 			gameObject->write(packet, false);
-			action = ReplicationAction::None;
+			action = ReplicationAction::Update;
 		}
 		else if (action == ReplicationAction::Update)
 		{

@@ -213,6 +213,10 @@ void ModuleNetworkingServer::onUpdate()
 	
 	if (state == ServerState::Listening)
 	{
+		// Handle Game State -------------------------
+
+		gameManager.update();
+
 		// Handle networked game object destructions
 		for (DelayedDestroyEntry &destroyEntry : netGameObjectsToDestroyWithDelay)
 		{
@@ -284,10 +288,6 @@ void ModuleNetworkingServer::onUpdate()
 				clientProxy.deliveryManager.processTimedOutPackets();
 			}
 		}
-
-		// Handle Game State -------------------------
-
-		gameManager.update();
 	}
 }
 

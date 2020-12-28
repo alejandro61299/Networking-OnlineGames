@@ -4,7 +4,7 @@ struct ClientProxy;
 
 enum class GameState
 {
-	None, WaitingPlayers, InGame, Results
+	None, WaitingPlayers, Start,  InGame, Results
 };
 
 class GameManager
@@ -22,5 +22,5 @@ private:
 	GameState gameState = GameState::None;
 	ClientProxy* gemstoneOwner = nullptr;
 	ClientProxy* winner = nullptr;
-	int minPlayers = 1;
+	int minPlayers = 2;
 };

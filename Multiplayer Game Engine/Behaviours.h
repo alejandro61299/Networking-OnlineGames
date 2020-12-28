@@ -51,7 +51,7 @@ struct Spaceship : public Behaviour
 {
 	static const uint8 MAX_HIT_POINTS = 5;
 	uint8 hitPoints = MAX_HIT_POINTS;
-	bool enableInput = true;
+	bool enableInput = false;
 
 	GameObject *lifebar = nullptr;
 
