@@ -3,6 +3,7 @@
 #include "Networks.h"
 
 #include "Behaviours.cpp"
+#include "GameManager.cpp"
 #include "DeliveryManager.cpp"
 #include "MemoryStream.cpp"
 #include "ModuleNetworking.cpp"

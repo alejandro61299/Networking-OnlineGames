@@ -1,7 +1,5 @@
 #include "ModuleNetworkingServer.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworkingServer public methods
 //////////////////////////////////////////////////////////////////////
@@ -33,6 +31,7 @@ void ModuleNetworkingServer::onStart()
 		return;
 	}
 
+	gameManager.init();
 	state = ServerState::Listening;
 }
 
@@ -168,8 +167,6 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			// Process the input packet and update the corresponding game object
 			if (proxy != nullptr && IsValid(proxy->gameObject))
 			{
-				
-
 				// Read input data
 				while (packet.RemainingByteCount() > 0)
 				{
@@ -244,6 +241,7 @@ void ModuleNetworkingServer::onUpdate()
 			if (clientProxy.connected)
 			{
 				// TODO(done): UDP virtual connection lab session
+				// TODO(done): World state replication lab session   
 
 				// Send Ping -----------------------------------
 				if (needToSendPing == true) 
@@ -265,7 +263,6 @@ void ModuleNetworkingServer::onUpdate()
 					clientProxy.gameObject = nullptr;
 				}
 
-				// TODO(done): World state replication lab session   !! ADD INTERVALS , CURRENTLY IS SENT EVERY FRAME !!
 				// World Replication -------------------------
 				clientProxy.secondsSinceLastReplication += Time.deltaTime;
 				float timeInterval = 0.1f;
@@ -279,6 +276,10 @@ void ModuleNetworkingServer::onUpdate()
 				}
 			}
 		}
+
+		// Handle Game State -------------------------
+
+		gameManager.update();
 	}
 }
 
@@ -320,7 +321,7 @@ void ModuleNetworkingServer::onDisconnect()
 // Client proxies
 //////////////////////////////////////////////////////////////////////
 
-ModuleNetworkingServer::ClientProxy * ModuleNetworkingServer::createClientProxy()
+ClientProxy * ModuleNetworkingServer::createClientProxy()
 {
 	// If it does not exist, pick an empty entry
 	for (int i = 0; i < MAX_CLIENTS; ++i)
@@ -334,7 +335,7 @@ ModuleNetworkingServer::ClientProxy * ModuleNetworkingServer::createClientProxy(
 	return nullptr;
 }
 
-ModuleNetworkingServer::ClientProxy * ModuleNetworkingServer::getClientProxy(const sockaddr_in &clientAddress)
+ClientProxy * ModuleNetworkingServer::getClientProxy(const sockaddr_in &clientAddress)
 {
 	// Try to find the client
 	for (int i = 0; i < MAX_CLIENTS; ++i)

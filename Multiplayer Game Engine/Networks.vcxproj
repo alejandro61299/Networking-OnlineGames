@@ -164,6 +164,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="imgui\imgui.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeaderFile>
@@ -403,6 +406,7 @@
     <ClInclude Include="ByteSwap.h" />
     <ClInclude Include="DeliveryManager.h" />
     <ClInclude Include="Behaviours.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Maths.h" />
     <ClInclude Include="MemoryStream.h" />
     <ClInclude Include="Messages.h" />

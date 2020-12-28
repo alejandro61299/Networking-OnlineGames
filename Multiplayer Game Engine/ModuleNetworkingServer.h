@@ -1,6 +1,35 @@
 #pragma once
-
 #include "ModuleNetworking.h"
+
+struct ClientProxy
+{
+	bool connected = false;
+	sockaddr_in address;
+	uint32 clientId;
+
+	std::string name;
+	GameObject* gameObject = nullptr;
+
+	struct PlayerData
+	{
+		bool spawned = true;
+		int points = 0;
+		float timeToSpawn = 0.f;
+	} playerData;
+
+	// TODO(done): UDP virtual connection lab session
+	double lastPacketRecivedTime = 0.0f;
+
+	// TODO(done): World state replication lab session
+	float secondsSinceLastReplication = 0;
+	ReplicationManagerServer replicationServer;
+
+	// TODO(you): Reliability on top of UDP lab session (DONE)
+	uint32 lastInputRecived = 0;
+
+	uint32 nextExpectedInputSequenceNumber = 0;
+	InputController gamepad;
+};
 
 class ModuleNetworkingServer : public ModuleNetworking
 {
@@ -42,28 +71,6 @@ private:
 
 	uint32 nextClientId = 0;
 
-	struct ClientProxy
-	{
-		bool connected = false;
-		sockaddr_in address;
-		uint32 clientId;
-		std::string name;
-		GameObject *gameObject = nullptr;
-
-		// TODO(done): UDP virtual connection lab session
-		double lastPacketRecivedTime = 0.0f;
-
-		// TODO(done): World state replication lab session
-		float secondsSinceLastReplication = 0;
-		ReplicationManagerServer replicationServer;
-
-		// TODO(you): Reliability on top of UDP lab session (DONE)
-		uint32 lastInputRecived = 0;
-
-		uint32 nextExpectedInputSequenceNumber = 0;
-		InputController gamepad;
-	};
-
 	ClientProxy clientProxies[MAX_CLIENTS];
 
 	ClientProxy * createClientProxy();
@@ -72,17 +79,14 @@ private:
 
     void destroyClientProxy(ClientProxy *clientProxy);
 
-
-
 public:
 
 	//////////////////////////////////////////////////////////////////////
 	// Spawning network objects
 	//////////////////////////////////////////////////////////////////////
-
 	GameObject * spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
-
-
+	friend class GameManager;
+	GameManager gameManager;
 
 private:
 
@@ -108,8 +112,6 @@ private:
 	};
 
 	DelayedDestroyEntry netGameObjectsToDestroyWithDelay[MAX_GAME_OBJECTS] = {};
-
-
 
 	//////////////////////////////////////////////////////////////////////
 	// State

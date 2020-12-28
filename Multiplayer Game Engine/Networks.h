@@ -300,10 +300,12 @@ extern RandomNumberGenerator Random;
 // FRAMEWORK HEADERS
 ////////////////////////////////////////////////////////////////////////
 
+
 #include "Maths.h"
 #include "Messages.h"
 #include "ByteSwap.h"
 #include "MemoryStream.h"
+#include "GameManager.h"
 #include "DeliveryManager.h"
 #include "ReplicationCommand.h"
 #include "ReplicationManagerClient.h"
