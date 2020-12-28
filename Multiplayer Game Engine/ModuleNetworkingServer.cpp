@@ -147,7 +147,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				}
 
 				OutputMemoryStream packet;
-				proxy->replicationServer.write(packet, proxy->lastInputRecived);
+				proxy->replicationServer.write(packet, *proxy);
 				sendPacket(packet, fromAddress);
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -199,6 +199,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			{
 				proxy->lastPacketRecivedTime = 0.0f;
 			}
+		}
+
+		else if (message == ClientMessage::Confirmation)
+		{
+			proxy->deliveryManager.processAckdSequenceNumbers(packet);
 		}
 	}
 }
@@ -270,10 +275,13 @@ void ModuleNetworkingServer::onUpdate()
 				if (clientProxy.secondsSinceLastReplication > timeInterval)
 				{
 					OutputMemoryStream packetReplication;
-					clientProxy.replicationServer.write(packetReplication, clientProxy.lastInputRecived);
+					clientProxy.replicationServer.write(packetReplication, clientProxy);
 					sendPacket(packetReplication, clientProxy.address);
 					clientProxy.secondsSinceLastReplication = clientProxy.secondsSinceLastReplication - timeInterval;
 				}
+
+				//Check if the packets don't recivied any confirmation
+				clientProxy.deliveryManager.processTimedOutPackets();
 			}
 		}
 

@@ -3,8 +3,12 @@
 
 // TODO(done): World state replication lab session
 
-void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& lastInputRecivied)
+void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& lastInputRecivied, DeliveryManager& deliveryManager)
 {
+	//If the packet is not correct or its not in the correct order, don't read it.
+	if (!deliveryManager.processSequenceNumber(packet))
+		return;
+	
 	size_t size;
 	packet >> size;
 

@@ -1,5 +1,7 @@
 #pragma once
 #include "ModuleNetworking.h"
+#include "ReplicationManagerServer.h"
+#include "DeliveryManager.h"
 
 struct ClientProxy
 {
@@ -26,6 +28,7 @@ struct ClientProxy
 
 	// TODO(you): Reliability on top of UDP lab session (DONE)
 	uint32 lastInputRecived = 0;
+	DeliveryManager deliveryManager;
 
 	uint32 nextExpectedInputSequenceNumber = 0;
 	InputController gamepad;

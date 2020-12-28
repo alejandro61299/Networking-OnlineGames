@@ -77,6 +77,7 @@ private:
 
 	float inputDeliveryIntervalSeconds = 0.05f;
 	float secondsSinceLastInputDelivery = 0.0f;
+	float secondsSinceLastConfirmationDelivery = 0.0f;
 
 
 
@@ -101,7 +102,8 @@ private:
 	// Delivery manager
 	//////////////////////////////////////////////////////////////////////
 
-	// TODO(you): Reliability on top of UDP lab session (?)
+	// TODO(you): Reliability on top of UDP lab session
+	DeliveryManager deliveryManager;
 
 
 

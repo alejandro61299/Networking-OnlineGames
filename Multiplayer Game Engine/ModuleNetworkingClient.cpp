@@ -136,7 +136,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			uint32 lastInputRecived = 0u;
 
-			replicationClient.read(packet, lastInputRecived);
+			replicationClient.read(packet, lastInputRecived, deliveryManager);
 
 			// TODO(you): Reliability on top of UDP lab session
 			inputDataFront = lastInputRecived; //Update last input processed.
@@ -234,6 +234,22 @@ void ModuleNetworkingClient::onUpdate()
 
 			sendPacket(packet, serverAddress);
 		}
+
+		secondsSinceLastConfirmationDelivery += Time.deltaTime;
+
+		if (secondsSinceLastConfirmationDelivery > CONFIRMATION_INTERVAL_SECONDS)
+		{
+			if (deliveryManager.hasSequenceNumbersPendingAck())
+			{
+				OutputMemoryStream packet;
+				deliveryManager.writeSequenceNumbersPendingAck(packet);
+
+				sendPacket(packet, serverAddress);
+			}
+
+			secondsSinceLastConfirmationDelivery = 0.0f;
+		}
+
 
 		// TODO(you): Latency management lab session
 
