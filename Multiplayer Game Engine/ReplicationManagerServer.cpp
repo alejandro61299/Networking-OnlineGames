@@ -74,5 +74,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ClientProxy &pr
 
 		++item; // Increased here by erase 
 	}
+	proxy.deliveryManager.packetsSaved.push_back(packet);
 
 }

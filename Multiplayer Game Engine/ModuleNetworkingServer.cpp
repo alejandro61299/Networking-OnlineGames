@@ -285,6 +285,26 @@ void ModuleNetworkingServer::onUpdate()
 
 				//Check if the packets don't recivied any confirmation
 				clientProxy.deliveryManager.processTimedOutPackets();
+
+				// Resend packets without a response
+				if (!clientProxy.deliveryManager.packetsToSend.empty())
+				{
+					for (auto currentPacket = clientProxy.deliveryManager.packetsToSend.begin(); currentPacket != clientProxy.deliveryManager.packetsToSend.end();)
+					{
+						sendPacket(*currentPacket, clientProxy.address);
+
+						currentPacket = clientProxy.deliveryManager.packetsToSend.erase(currentPacket);
+
+					}
+
+					for (auto currentPacket = clientProxy.deliveryManager.packetsSaved.begin(); currentPacket != clientProxy.deliveryManager.packetsSaved.end();)
+					{
+						sendPacket(*currentPacket, clientProxy.address);
+						++currentPacket;
+						//currentPacket = clientProxy.deliveryManager.packetsSaved.erase(currentPacket);
+
+					}
+				}
 			}
 		}
 	}

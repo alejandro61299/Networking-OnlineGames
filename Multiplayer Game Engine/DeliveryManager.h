@@ -39,6 +39,10 @@ public:
 	void processAckdSequenceNumbers(const InputMemoryStream& packet);
 	void processTimedOutPackets();
 
+	std::list<OutputMemoryStream> packetsSaved;
+	std::list<OutputMemoryStream> packetsToSend;
+
+
 private:
 
 	// Private members (Senser side)

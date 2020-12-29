@@ -7,7 +7,40 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 {
 	//If the packet is not correct or its not in the correct order, don't read it.
 	if (!deliveryManager.processSequenceNumber(packet))
+	{
+		//Read the content but don't do anything
+		size_t size;
+		packet >> size;
+
+		packet >> lastInputRecivied;
+
+		for (int i = 0; i < size; ++i)
+		{
+			uint32 id = 0;
+			packet >> id;
+			int action = -1;
+			packet >> action;
+
+			if (action == (int)ReplicationAction::None)
+			{
+				continue;
+			}
+
+			GameObject gameObjectDummy = *App->modLinkingContext->getNetworkGameObject(id);
+
+			if (action == (int)ReplicationAction::Update)
+			{
+				gameObjectDummy.read(packet, true);
+			}
+			if (action == (int)ReplicationAction::Create)
+			{
+				
+				gameObjectDummy.read(packet, false);
+			}
+		}
+
 		return;
+	}
 	
 	size_t size;
 	packet >> size;
@@ -49,4 +82,5 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 			gameObject->read(packet, false);
 		}
 	}
+
 }

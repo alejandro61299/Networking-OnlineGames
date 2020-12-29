@@ -71,14 +71,27 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
         uint32 currentSequenceNumber;
         packet >> currentSequenceNumber;
 
+        int cont = 0;
         for (Delivery* currentDelivery : pendingDeliveries)
         {
             if (currentDelivery->sequenceNumber == currentSequenceNumber)
             {
                 //TODO Succes!
-                pendingDeliveries.remove(currentDelivery); // Problems with the for??
+                pendingDeliveries.remove(currentDelivery);
                 break;
             }
+            ++cont;
+        }
+
+        int cont2 = 0;
+        for (auto currentPacket = packetsSaved.begin(); currentPacket != packetsSaved.end(); ++currentPacket)
+        {
+            if (cont2 == cont)
+            {
+                packetsSaved.erase(currentPacket);
+                break;
+            }
+            ++cont2;
         }
     }
 
@@ -86,6 +99,7 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 
 void DeliveryManager::processTimedOutPackets()
 {
+    int cont = 0;
     for (Delivery* currentDelivery : pendingDeliveries)
     {
         currentDelivery->dispatchTime += Time.deltaTime;
@@ -95,6 +109,20 @@ void DeliveryManager::processTimedOutPackets()
             //TODO Failure!
             LOG("Failure!!!!");
 
+            int cont2 = 0;
+            for (auto currentPacket = packetsSaved.begin(); currentPacket != packetsSaved.end(); ++currentPacket)
+            {
+                if (cont2 == cont)
+                {
+                    packetsToSend.push_back(*currentPacket);
+                    break;
+                }
+                ++cont2;
+            }
+
+            currentDelivery->dispatchTime = 0.0;
+
         }
+        ++cont;
     }
 }
