@@ -111,12 +111,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					proxy->address.sin_port = fromAddress.sin_port;
 					proxy->connected = true;
 					proxy->name = playerName;
+					proxy->playerData.spaceshipType = spaceshipType;
 					proxy->clientId = nextClientId++;
 
-					// Create new network object
-					vec2 initialPosition = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f};
-					float initialAngle = 360.0f * Random.next();
-					proxy->gameObject = spawnPlayer(spaceshipType, initialPosition, initialAngle);
+					// Add Player to Game
+					gameManager.addPlayer(proxy);
 				}
 				else
 				{
@@ -374,38 +373,6 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
 // Spawning
 //////////////////////////////////////////////////////////////////////
 
-GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle)
-{
-	// Create a new game object with the player properties
-	GameObject *gameObject = NetworkInstantiate();
-	gameObject->position = initialPosition;
-	gameObject->size = { 100, 100 };
-	gameObject->angle = initialAngle;
-
-	// Create sprite
-	gameObject->sprite = App->modRender->addSprite(gameObject);
-	gameObject->sprite->order = 5;
-	if (spaceshipType == 0) {
-		gameObject->sprite->texture = App->modResources->spacecraft1;
-	}
-	else if (spaceshipType == 1) {
-		gameObject->sprite->texture = App->modResources->spacecraft2;
-	}
-	else {
-		gameObject->sprite->texture = App->modResources->spacecraft3;
-	}
-
-	// Create collider
-	gameObject->collider = App->modCollision->addCollider(ColliderType::Player, gameObject);
-	gameObject->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
-
-	// Create behaviour
-	Spaceship * spaceshipBehaviour = App->modBehaviour->addSpaceship(gameObject);
-	gameObject->behaviour = spaceshipBehaviour;
-	gameObject->behaviour->isServer = true;
-
-	return gameObject;
-}
 
 
 //////////////////////////////////////////////////////////////////////

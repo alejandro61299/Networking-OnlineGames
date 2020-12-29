@@ -35,7 +35,7 @@ struct GameObject
 	Behaviour *behaviour = nullptr;
 
 	// Tag for custom usage
-	uint32 tag = 0;
+	uint32 tag = UINT32_MAX;
 
 	// Network identity component
 	uint32 networkId = 0;                    // NOTE(jesus): Only for network game objects
@@ -96,7 +96,7 @@ public:
 
 	static void Destroy(GameObject * gameObject, float delaySeconds);
 
-
+	static GameObject* FindGameObjectByTag(uint32 tag);
 
 	GameObject gameObjects[MAX_GAME_OBJECTS] = {};
 

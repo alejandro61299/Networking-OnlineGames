@@ -122,6 +122,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
 			state = ClientState::Connected;
+			pointer = GameManager::spawnPointer(playerId, { 0.f, 0.f }, 0.f);
+
 		}
 		else if (message == ServerMessage::Unwelcome)
 		{

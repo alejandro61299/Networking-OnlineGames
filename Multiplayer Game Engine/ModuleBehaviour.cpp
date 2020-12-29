@@ -13,6 +13,16 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(&behaviour);
 	}
 
+	for (Gemstone& behaviour : gemstones)
+	{
+		handleBehaviourLifeCycle(&behaviour);
+	}
+
+	for (Pointer& behaviour : pointers)
+	{
+		handleBehaviourLifeCycle(&behaviour);
+	}
+
 	return true;
 }
 
@@ -24,6 +34,8 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 		return addSpaceship(parentGameObject);
 	case BehaviourType::Laser:
 		return addLaser(parentGameObject);
+	case BehaviourType::Gemstone:
+		return addGemstone(parentGameObject);
 	default:
 		return nullptr;
 	}
@@ -62,6 +74,42 @@ Laser *ModuleBehaviour::addLaser(GameObject *parentGameObject)
 	ASSERT(false);
 	return nullptr;
 }
+
+Gemstone* ModuleBehaviour::addGemstone(GameObject* parentGameObject)
+{
+	for (Gemstone& behaviour : gemstones)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+
+Pointer* ModuleBehaviour::addPointer(GameObject* parentGameObject)
+{
+	for (Pointer& behaviour : pointers)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
 
 void ModuleBehaviour::handleBehaviourLifeCycle(Behaviour *behaviour)
 {

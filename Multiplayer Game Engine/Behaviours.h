@@ -1,5 +1,6 @@
 #pragma once
 
+#define GEMSTONE_TAG 20U
 
 enum class BehaviourType : uint8;
 
@@ -32,6 +33,8 @@ enum class BehaviourType : uint8
 	None,
 	Spaceship,
 	Laser,
+	Gemstone,
+	Pointer
 };
 
 
@@ -44,6 +47,12 @@ struct Laser : public Behaviour
 	void start() override;
 
 	void update() override;
+
+	void write(OutputMemoryStream& packet) override;
+
+	void read(const InputMemoryStream& packet) override;
+
+	uint32 ownerTag = UINT32_MAX;
 };
 
 
@@ -51,7 +60,7 @@ struct Spaceship : public Behaviour
 {
 	static const uint8 MAX_HIT_POINTS = 5;
 	uint8 hitPoints = MAX_HIT_POINTS;
-	bool enableInput = false;
+	bool enableInput = true;
 
 	GameObject *lifebar = nullptr;
 
@@ -76,18 +85,24 @@ struct Gemstone : public Behaviour
 {
 	bool enableInput = false;
 
-
-	BehaviourType type() const override { return BehaviourType::Spaceship; }
-
-	void start() override;
+	BehaviourType type() const override { return BehaviourType::Gemstone; }
 
 	void update() override;
-
-	void destroy() override;
 
 	void onCollisionTriggered(Collider& c1, Collider& c2) override;
 
 	void write(OutputMemoryStream& packet) override;
 
 	void read(const InputMemoryStream& packet) override;
+};
+
+struct Pointer : public Behaviour
+{
+	BehaviourType type() const override { return BehaviourType::Pointer; }
+
+	void update() override;
+
+	GameObject* playerSpaceship = nullptr;
+	GameObject* gemstoneGo = nullptr;
+	uint32 clientId;
 };

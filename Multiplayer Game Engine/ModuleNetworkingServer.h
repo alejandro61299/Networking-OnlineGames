@@ -14,6 +14,7 @@ struct ClientProxy
 
 	struct PlayerData
 	{
+		uint8 spaceshipType = 0u;
 		bool spawned = true;
 		int points = 0;
 		float timeToSpawn = 0.f;
@@ -87,7 +88,6 @@ public:
 	//////////////////////////////////////////////////////////////////////
 	// Spawning network objects
 	//////////////////////////////////////////////////////////////////////
-	GameObject * spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
 	friend class GameManager;
 	GameManager gameManager;
 

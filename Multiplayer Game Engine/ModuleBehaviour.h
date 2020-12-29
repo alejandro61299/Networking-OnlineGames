@@ -11,6 +11,8 @@ public:
 	Behaviour * addBehaviour(BehaviourType behaviourType, GameObject *parentGameObject);
 	Spaceship * addSpaceship(GameObject *parentGameObject);
 	Laser     * addLaser(GameObject *parentGameObject);
+	Gemstone*   addGemstone(GameObject* parentGameObject);
+	Pointer*	addPointer(GameObject* parentGameObject);
 
 private:
 
@@ -18,5 +20,7 @@ private:
 
 	Spaceship spaceships[MAX_CLIENTS];
 	Laser lasers[MAX_GAME_OBJECTS];
+	Gemstone gemstones[MAX_CLIENTS];
+	Pointer pointers[MAX_CLIENTS];
 };
 

@@ -6,7 +6,6 @@
 void Laser::start()
 {
 	gameObject->networkInterpolationEnabled = false;
-
 	App->modSound->playAudioClip(App->modResources->audioClipLaser);
 }
 
@@ -31,14 +30,18 @@ void Laser::update()
 	}
 }
 
+void Laser::write(OutputMemoryStream& packet)
+{
+	packet << ownerTag;
+}
 
-
-
+void Laser::read(const InputMemoryStream& packet)
+{
+	packet >> ownerTag;
+}
 
 void Spaceship::start()
 {
-	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
-
 	lifebar = Instantiate();
 	lifebar->sprite = App->modRender->addSprite(lifebar);
 	lifebar->sprite->pivot = vec2{ 0.0f, 0.5f };
@@ -88,8 +91,8 @@ void Spaceship::onInput(const InputController &input)
 
 			Laser *laserBehaviour = App->modBehaviour->addLaser(laser);
 			laserBehaviour->isServer = isServer;
-
-			laser->tag = gameObject->tag;
+			laserBehaviour->ownerTag = gameObject->tag;
+			laserBehaviour->isServer = isServer;
 		}
 	}
 }
@@ -111,8 +114,11 @@ void Spaceship::destroy()
 
 void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 {
-	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
+	if (c2.type == ColliderType::Laser)
 	{
+		Laser* laser = (Laser*)c2.gameObject->behaviour;
+		if (laser->ownerTag == gameObject->tag) return;
+
 		if (isServer)
 		{
 			NetworkDestroy(c2.gameObject); // Destroy the laser
@@ -166,4 +172,53 @@ void Spaceship::read(const InputMemoryStream & packet)
 {
 	packet >> hitPoints;
 	packet >> enableInput;
+}
+
+
+void Gemstone::update()
+{
+}
+
+void Gemstone::onCollisionTriggered(Collider& c1, Collider& c2)
+{
+}
+
+void Gemstone::write(OutputMemoryStream& packet)
+{
+}
+
+void Gemstone::read(const InputMemoryStream& packet)
+{
+}
+
+void Pointer::update()
+{
+	playerSpaceship = App->modGameObject->FindGameObjectByTag( clientId);
+	gemstoneGo = App->modGameObject->FindGameObjectByTag(GEMSTONE_TAG);
+		
+	if (playerSpaceship == nullptr || gemstoneGo == nullptr )
+	{
+		gameObject->sprite->order = -5;
+		return;
+	}
+	else
+	{
+		gameObject->sprite->order = 6;
+	}
+
+
+	vec2 offset = gemstoneGo->position - playerSpaceship->position;
+
+	if (length(offset) < 300.f)
+	{
+		gameObject->sprite->order = -5;
+		return;
+	}
+
+	offset = normalize(offset);
+	offset = 100.f * offset;
+	float angle = atan2(offset.y, offset.x) * RAD2DEG;
+	
+	gameObject->position =  playerSpaceship->position + offset;
+	gameObject->angle = 90.f + angle;
 }

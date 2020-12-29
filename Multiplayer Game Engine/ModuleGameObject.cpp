@@ -291,6 +291,19 @@ void ModuleGameObject::Destroy(GameObject * gameObject, float delaySeconds)
 	}
 }
 
+GameObject* ModuleGameObject::FindGameObjectByTag(uint32 tag)
+{
+	for (GameObject& gameObject : App->modGameObject->gameObjects)
+	{
+		if (gameObject.tag == tag)
+		{
+			return &gameObject;
+		}
+	}
+
+	return nullptr;
+}
+
 GameObject * Instantiate()
 {
 	GameObject *result = ModuleGameObject::Instantiate();
