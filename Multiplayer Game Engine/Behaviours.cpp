@@ -121,7 +121,11 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 
 		if (isServer)
 		{
-			NetworkDestroy(c2.gameObject); // Destroy the laser
+			// Remove gameObject on client
+	/*		App->modNetServer*/
+
+			// Destroy the laser
+			NetworkDestroy(c2.gameObject);
 		
 			if (hitPoints > 0)
 			{
@@ -129,18 +133,25 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				NetworkUpdate(gameObject);
 			}
 
-			float size = 30 + 50.0f * Random.next();
-			vec2 position = gameObject->position + 50.0f * vec2{Random.next() - 0.5f, Random.next() - 0.5f};
+			// Destroy ship
+			float size;
+			vec2  position;
 
 			if (hitPoints <= 0)
 			{
 				// Centered big explosion
 				size = 250.0f + 100.0f * Random.next();
 				position = gameObject->position;
-
 				NetworkDestroy(gameObject);
 			}
+			else
+			{
+				// Little Random explosion
+				size = 30 + 50.0f * Random.next();
+				position = gameObject->position + 50.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+			}
 
+			// Explosion
 			GameObject *explosion = NetworkInstantiate();
 			explosion->position = position;
 			explosion->size = vec2{ size, size };
@@ -149,15 +160,12 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 			explosion->sprite = App->modRender->addSprite(explosion);
 			explosion->sprite->texture = App->modResources->explosion1;
 			explosion->sprite->order = 100;
-
 			explosion->animation = App->modRender->addAnimation(explosion);
 			explosion->animation->clip = App->modResources->explosionClip;
-
 			NetworkDestroy(explosion, 2.0f);
-
+			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 			// NOTE(jesus): Only played in the server right now...
 			// You need to somehow make this happen in clients
-			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 		}
 	}
 }
@@ -174,27 +182,60 @@ void Spaceship::read(const InputMemoryStream & packet)
 	packet >> enableInput;
 }
 
+void Gemstone::start()
+{
+	gameObject->networkInterpolationEnabled = false;
+}
 
 void Gemstone::update()
 {
+	if (ownerTag != UINT32_MAX)
+	{
+		GameObject* playerSpaceship = App->modGameObject->FindGameObjectByTag(ownerTag);
+
+		if (playerSpaceship == nullptr)
+		{
+			ownerTag = UINT32_MAX;
+			return;
+		}
+
+		float speed = 2.f;
+		vec2 offset = gameObject->position - playerSpaceship->position;
+		float distance = length(offset);
+
+		if (distance > 90.f)
+			gameObject->position = lerp(gameObject->position, playerSpaceship->position, speed * Time.deltaTime);
+	}
 }
 
 void Gemstone::onCollisionTriggered(Collider& c1, Collider& c2)
 {
+	if (c2.type == ColliderType::Player)
+	{
+		if (isServer)
+		{
+			if (ownerTag != UINT32_MAX) return;
+			Spaceship* spaceship = (Spaceship*)c2.gameObject->behaviour;
+			ownerTag = spaceship->gameObject->tag;
+			NetworkUpdate(gameObject);
+		}
+	}
 }
 
 void Gemstone::write(OutputMemoryStream& packet)
 {
+	packet << ownerTag;
 }
 
 void Gemstone::read(const InputMemoryStream& packet)
 {
+	packet >> ownerTag;
 }
 
 void Pointer::update()
 {
-	playerSpaceship = App->modGameObject->FindGameObjectByTag( clientId);
-	gemstoneGo = App->modGameObject->FindGameObjectByTag(GEMSTONE_TAG);
+	GameObject* playerSpaceship = App->modGameObject->FindGameObjectByTag(ownerTag);
+	GameObject* gemstoneGo = App->modGameObject->FindGameObjectByTag(GEMSTONE_TAG);
 		
 	if (playerSpaceship == nullptr || gemstoneGo == nullptr )
 	{
@@ -202,23 +243,21 @@ void Pointer::update()
 		return;
 	}
 	else
-	{
 		gameObject->sprite->order = 6;
-	}
-
 
 	vec2 offset = gemstoneGo->position - playerSpaceship->position;
+	float distance = length(offset);
 
-	if (length(offset) < 300.f)
-	{
+	if (distance <= 400.f && distance >= 150.f)
+		gameObject->sprite->color.a = lerp(0.f, 1.f, (distance - 150.f) / 250.f );
+	else if (distance < 150.f)
 		gameObject->sprite->order = -5;
-		return;
-	}
+	else
+		gameObject->sprite->color.a = 1.f;
 
 	offset = normalize(offset);
 	offset = 100.f * offset;
-	float angle = atan2(offset.y, offset.x) * RAD2DEG;
-	
+
 	gameObject->position =  playerSpaceship->position + offset;
-	gameObject->angle = 90.f + angle;
+	gameObject->angle = 90.f + atan2(offset.y, offset.x) * RAD2DEG;
 }

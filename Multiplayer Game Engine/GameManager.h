@@ -1,4 +1,6 @@
 #pragma once
+#define MAX_GAME_TIME 10.F
+#define MAX_RESULT_TIME 10.F
 
 struct ClientProxy;
 
@@ -18,7 +20,7 @@ public:
 	void addPlayer(ClientProxy* client);
 
 	// Spawn Network Objects -----------------------------
-	static GameObject* spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
+	static GameObject* spawnSpaceship(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
 	static GameObject* spawnGemstone(vec2 initialPosition, float initialAngle);
 	static GameObject* spawnPointer(uint32 clientId, vec2 initialPosition, float initialAngle);
 
@@ -30,7 +32,8 @@ private:
 private:
 
 	GameState gameState = GameState::None;
-	ClientProxy* gemstoneOwner = nullptr;
-	ClientProxy* winner = nullptr;
+	uint32* gemstoneOwner = nullptr;
+	GameObject* gemstone = nullptr;
+	float currentGameTime = 0.f;
 	int minPlayers = 1;
 };

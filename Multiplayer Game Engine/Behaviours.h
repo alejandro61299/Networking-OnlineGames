@@ -83,9 +83,11 @@ struct Spaceship : public Behaviour
 
 struct Gemstone : public Behaviour
 {
-	bool enableInput = false;
+	uint32 ownerTag = UINT32_MAX;
 
 	BehaviourType type() const override { return BehaviourType::Gemstone; }
+
+	void start() override;
 
 	void update() override;
 
@@ -102,7 +104,5 @@ struct Pointer : public Behaviour
 
 	void update() override;
 
-	GameObject* playerSpaceship = nullptr;
-	GameObject* gemstoneGo = nullptr;
-	uint32 clientId;
+	uint32 ownerTag;
 };

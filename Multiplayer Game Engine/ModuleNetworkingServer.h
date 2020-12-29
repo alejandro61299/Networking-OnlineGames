@@ -151,3 +151,4 @@ void NetworkUpdate(GameObject *gameObject);
 // machines.
 void NetworkDestroy(GameObject *gameObject);
 void NetworkDestroy(GameObject *gameObject, float delaySeconds);
+void NetworkPlayAudio(AudioClip* clip);

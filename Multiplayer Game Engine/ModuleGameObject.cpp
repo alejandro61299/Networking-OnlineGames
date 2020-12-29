@@ -275,6 +275,7 @@ void ModuleGameObject::Destroy(GameObject * gameObject)
 	};
 
 	ASSERT(gameObject->state < GameObject::STATE_COUNT);
+	gameObject->tag = UINT32_MAX;
 	gameObject->state = gNextState[gameObject->state];
 }
 

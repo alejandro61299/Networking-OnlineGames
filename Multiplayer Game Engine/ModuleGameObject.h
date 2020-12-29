@@ -67,7 +67,6 @@ public :
 	void write(OutputMemoryStream& packet, const bool useFlags);
 	void read(const InputMemoryStream& packet  , const bool useFlags);
 
-
 private:
 
 	void * operator new(size_t size) = delete;

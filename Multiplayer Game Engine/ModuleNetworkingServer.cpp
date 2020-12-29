@@ -510,3 +510,7 @@ void NetworkDestroy(GameObject * gameObject, float delaySeconds)
 
 	App->modNetServer->destroyNetworkObject(gameObject, delaySeconds);
 }
+
+void NetworkPlayAudio(AudioClip* clip)
+{
+}

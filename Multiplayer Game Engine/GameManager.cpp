@@ -14,17 +14,37 @@ void GameManager::update()
 	switch (gameState)
 	{
 	case GameState::WaitingPlayers:
+	{
 		if (getNumPlayers() >= minPlayers)
 		{
 			enableInputPlayers(true);
-			spawnGemstone({ 0.f, 0.f }, 0.f);
+			gemstone = spawnGemstone({ 0.f, 0.f }, 0.f);
+			currentGameTime = 0.f;
 			gameState = GameState::InGame;
 		}
 		break;
-	case GameState::InGame:
+	} 
+	case GameState::InGame: 
+	{
+		currentGameTime += Time.deltaTime;
+		if (currentGameTime >= MAX_GAME_TIME)
+		{
+			NetworkDestroy(gemstone);
+			currentGameTime = 0.f;
+			gameState = GameState::Results;
+		}
 		break;
+	} 
 	case GameState::Results:
+	{
+		currentGameTime += Time.deltaTime;
+		if (currentGameTime >= MAX_RESULT_TIME)
+		{
+			currentGameTime = 0.f;
+			gameState = GameState::WaitingPlayers;
+		}
 		break;
+	}
 	default:
 		break;
 	}
@@ -65,14 +85,14 @@ void GameManager::addPlayer(ClientProxy* client)
 		{
 			float deg = (360.F / (float)MAX_CLIENTS) * i;
 			vec2 pos = 500.f * vec2FromDegrees(180.f + deg);
-			client->gameObject = spawnPlayer(client->playerData.spaceshipType, pos, deg);
+			client->gameObject = spawnSpaceship(client->playerData.spaceshipType, pos, deg);
 			client->gameObject->tag = client->clientId;
 			break;
 		}
 	}
 }
 
-GameObject* GameManager::spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle)
+GameObject* GameManager::spawnSpaceship(uint8 spaceshipType, vec2 initialPosition, float initialAngle)
 {
 	// Create a new game object with the player properties
 	GameObject* gameObject = NetworkInstantiate();
@@ -119,6 +139,10 @@ GameObject* GameManager::spawnGemstone(vec2 initialPosition, float initialAngle)
 	gameObject->sprite->texture = App->modResources->gemstone;
 	gameObject->sprite->order = 5;
 
+	// Create collider
+	gameObject->collider = App->modCollision->addCollider(ColliderType::Gemstone, gameObject);
+	gameObject->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
+
 	// Create behaviour
 	Gemstone* gemstone = App->modBehaviour->addGemstone(gameObject);
 	gameObject->behaviour = gemstone;
@@ -141,8 +165,7 @@ GameObject* GameManager::spawnPointer(uint32 clientId, vec2 initialPosition, flo
 
 	// Create behaviour
 	Pointer* pointer = App->modBehaviour->addPointer(gameObject);
-	pointer->clientId = clientId;
+	pointer->ownerTag = clientId;
 	gameObject->behaviour = pointer;
-	gameObject->behaviour->isServer = true;
 	return gameObject;
 }
