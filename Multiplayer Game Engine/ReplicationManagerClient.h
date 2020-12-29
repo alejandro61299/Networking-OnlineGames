@@ -6,5 +6,5 @@
 class ReplicationManagerClient
 {
 public:
-    void read(const InputMemoryStream& packet, uint32& lastInputRecivied, DeliveryManager& deliveryManager);
+    void read(const InputMemoryStream& packet, uint32& lastInputRecivied, DeliveryManager& deliveryManager, GameObject Dummy);
 };

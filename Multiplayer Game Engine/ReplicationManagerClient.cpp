@@ -3,7 +3,7 @@
 
 // TODO(done): World state replication lab session
 
-void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& lastInputRecivied, DeliveryManager& deliveryManager)
+void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& lastInputRecivied, DeliveryManager& deliveryManager, GameObject Dummy)
 {
 	//If the packet is not correct or its not in the correct order, don't read it.
 	if (!deliveryManager.processSequenceNumber(packet))
@@ -26,7 +26,8 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 				continue;
 			}
 
-			GameObject gameObjectDummy = *App->modLinkingContext->getNetworkGameObject(id);
+			GameObject gameObjectDummy = Dummy;
+
 
 			if (action == (int)ReplicationAction::Update)
 			{

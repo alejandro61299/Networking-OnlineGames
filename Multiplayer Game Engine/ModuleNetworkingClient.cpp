@@ -138,7 +138,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			uint32 lastInputRecived = 0u;
 
-			replicationClient.read(packet, lastInputRecived, deliveryManager);
+			replicationClient.read(packet, lastInputRecived, deliveryManager, *pointer);
 
 			// TODO(you): Reliability on top of UDP lab session
 			inputDataFront = lastInputRecived; //Update last input processed.
