@@ -26,17 +26,17 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 				continue;
 			}
 
-			GameObject gameObjectDummy = Dummy;
+			GameObject gameObjectDummy;
 
 
 			if (action == (int)ReplicationAction::Update)
 			{
-				gameObjectDummy.read(packet, true);
+				gameObjectDummy.readDummy(packet, true);
 			}
 			if (action == (int)ReplicationAction::Create)
 			{
 				
-				gameObjectDummy.read(packet, false);
+				gameObjectDummy.readDummy(packet, false);
 			}
 		}
 

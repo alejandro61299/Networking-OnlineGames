@@ -185,6 +185,117 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 	}
 }
 
+void GameObject::readDummy(const InputMemoryStream& packet, const bool useFlags)
+{
+	if (useFlags)
+	{
+		packet >> updateFlags;
+	}
+
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::POSITION)))
+	{
+		packet >> position.x;
+		packet >> position.y;
+	}
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ROTATION)))
+	{
+		packet >> angle;
+	}
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::SIZE)))
+	{
+		packet >> size.x;
+		packet >> size.y;
+	}
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::TAG)))
+	{
+		packet >> tag;
+	}
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::SPRITE)))
+	{
+		int textureID = -1;
+		packet >> textureID;
+
+		if (textureID != -1) {
+			int spriteDummyInt;
+			float spriteDummy[6];
+			packet >> spriteDummyInt;
+			packet >> spriteDummy[0];
+			packet >> spriteDummy[1];
+			packet >> spriteDummy[2];
+			packet >> spriteDummy[3];
+			packet >> spriteDummy[4];
+			packet >> spriteDummy[5];
+		}
+	}
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ANIMATION)))
+	{
+		bool hasAnimation = false;
+		packet >> hasAnimation;
+
+		if (hasAnimation)
+		{
+
+			uint16 clipId = 0;
+			packet >> clipId;
+
+			uint8 currentFrameDummy = 0;
+			packet >> currentFrameDummy;
+
+			float elapsedTimeDummy = 0.f;
+			packet >> elapsedTimeDummy;
+		}
+	}
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::COLLIDER)))
+	{
+		bool hasCollider = false;
+		packet >> hasCollider;
+
+		if (hasCollider)
+		{
+			ColliderType colliderType = ColliderType::None;
+			packet >> colliderType;
+
+			bool colliderIsTriggerDummy;
+			packet >> colliderIsTriggerDummy;
+		}
+	}
+
+	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::BEHAVIOUR)))
+	{
+		bool hasBehaviour = false;
+		packet >> hasBehaviour;
+
+		if (hasBehaviour)
+		{
+			BehaviourType behaviourType = BehaviourType::None;
+			packet >> behaviourType;
+
+
+			Spaceship ship;
+			Laser laser;
+			Gemstone gemstone;
+
+			switch (behaviourType)
+			{
+			case BehaviourType::Spaceship:
+				
+				ship.read(packet);
+				break;
+			case BehaviourType::Laser:
+				
+				laser.read(packet);
+				break;
+			case BehaviourType::Gemstone:
+				
+				gemstone.read(packet);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
 bool ModuleGameObject::init()
 {
 	return true;

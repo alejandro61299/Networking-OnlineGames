@@ -66,6 +66,7 @@ public :
 
 	void write(OutputMemoryStream& packet, const bool useFlags);
 	void read(const InputMemoryStream& packet  , const bool useFlags);
+	void readDummy(const InputMemoryStream& packet, const bool useFlags);
 
 private:
 
