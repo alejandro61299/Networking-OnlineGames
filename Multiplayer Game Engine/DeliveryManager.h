@@ -17,6 +17,7 @@ struct Delivery
 	uint32 sequenceNumber = 0;
 	double dispatchTime = 0.0;
 	DeliveryDelegate* delegate = nullptr;
+	bool resend = false;
 };
 
 
@@ -42,7 +43,7 @@ public:
 	std::list<OutputMemoryStream> packetsSaved;
 	std::list<OutputMemoryStream> packetsToSend;
 
-
+	std::list<Delivery*> pendingDeliveries;
 private:
 
 	// Private members (Senser side)
@@ -50,7 +51,7 @@ private:
 	uint32 nextSequenceNumber = 0;
 
 	// - A list of pending deliveries
-	std::list<Delivery*> pendingDeliveries;
+	
 
 
 	// Private members (Receiver side)

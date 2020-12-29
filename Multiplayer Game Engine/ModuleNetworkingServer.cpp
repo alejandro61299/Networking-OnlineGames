@@ -296,13 +296,61 @@ void ModuleNetworkingServer::onUpdate()
 						currentPacket = clientProxy.deliveryManager.packetsToSend.erase(currentPacket);
 
 					}
+					clientProxy.resendAllPackets = true;
+				}
 
-					for (auto currentPacket = clientProxy.deliveryManager.packetsSaved.begin(); currentPacket != clientProxy.deliveryManager.packetsSaved.end();)
+				if (clientProxy.resendAllPackets)
+				{
+
+					int cont = 0;
+					bool a = false;
+					for (Delivery* currentDelivery : clientProxy.deliveryManager.pendingDeliveries)
 					{
-						sendPacket(*currentPacket, clientProxy.address);
-						++currentPacket;
-						//currentPacket = clientProxy.deliveryManager.packetsSaved.erase(currentPacket);
+						
+						if (currentDelivery->resend == false)
+						{
+							currentDelivery->resend = true;
+							a = true;
+							break;
+						}
+						++cont;
 
+					}
+
+					if (!a)
+					{
+						clientProxy.resendAllPackets = false;
+					}
+					else
+					{
+						int cont2 = 0;
+						for (auto currentPacket = clientProxy.deliveryManager.packetsSaved.begin(); currentPacket != clientProxy.deliveryManager.packetsSaved.end();)
+						{
+
+							//sendPacket(*currentPacket, clientProxy.address);
+							if (cont2 == cont)
+							{
+								clientProxy.deliveryManager.packetsToSend.push_back(*currentPacket);
+
+								break;
+							}
+							++cont2;
+							++currentPacket;
+						}
+
+						if (clientProxy.deliveryManager.packetsSaved.empty())
+							clientProxy.resendAllPackets = false;
+
+					}
+				}
+				else
+				{
+					for (Delivery* currentDelivery : clientProxy.deliveryManager.pendingDeliveries)
+					{
+
+						
+						currentDelivery->resend = false;
+						
 					}
 				}
 			}

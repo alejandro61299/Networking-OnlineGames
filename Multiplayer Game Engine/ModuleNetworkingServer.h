@@ -31,6 +31,8 @@ struct ClientProxy
 	uint32 lastInputRecived = 0;
 	DeliveryManager deliveryManager;
 
+	bool resendAllPackets = false;
+
 	uint32 nextExpectedInputSequenceNumber = 0;
 	InputController gamepad;
 };
