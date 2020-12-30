@@ -34,6 +34,7 @@ public:
 
 	void spawnAllPlayers();
 	void despawnAllPlayers();
+	void setPlayersPoints(int points);
 	void setPlayersState(GameData::PlayerState state);
 	void setPlayersResults();
 

@@ -16,6 +16,7 @@ void GameManager::update()
 	case GameState::WaitingPlayers:
 	{
 		setPlayersState(GameData::PlayerState::Waiting);
+		setPlayersPoints(0);
 		enableInputPlayers(false);
 
 		if (getNumPlayers() >= MIN_GAME_PLAYERS)
@@ -134,6 +135,17 @@ void GameManager::despawnAllPlayers()
 		{
 			GameManager::spawnExplosion(true, client.gameObject->position, 0.f);
 			despawnPlayer(client.clientId);
+		}
+	}
+}
+
+void GameManager::setPlayersPoints(int points)
+{
+	for (auto& client : App->modNetServer->clientProxies)
+	{
+		if (client.connected)
+		{
+			client.gameData.points = points;
 		}
 	}
 }
