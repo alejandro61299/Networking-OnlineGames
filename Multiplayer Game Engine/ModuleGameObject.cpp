@@ -83,6 +83,10 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 
 void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 {
+	float positionX, positionY;
+	float newAngle;
+
+
 	if (useFlags)
 	{
 		packet >> updateFlags;
@@ -90,12 +94,12 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::POSITION)))
 	{
-		packet >> position.x;
-		packet >> position.y;
+		packet >> positionX;
+		packet >> positionY;
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ROTATION)))
 	{
-		packet >> angle;
+		packet >> newAngle;
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::SIZE)))
 	{
@@ -175,6 +179,28 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 			BehaviourType behaviourType = BehaviourType::None;
 			packet >> behaviourType;
 
+			if (behaviourType == BehaviourType::Spaceship)
+			{
+				initialPosition = finalPosition;
+				finalPosition.x = positionX;
+				finalPosition.y = positionY;
+
+				initialAngle = finalAngle;
+				finalAngle = newAngle;
+
+				interpolationTime = 0.0f;
+			}
+			else
+			{
+				position.x = positionX;
+				position.y = positionY;
+				finalPosition.x = positionX;
+				finalPosition.y = positionY;
+
+				angle = newAngle;
+				finalAngle = newAngle;
+			}
+
 			if (behaviour == nullptr)
 			{
 				behaviour = App->modBehaviour->addBehaviour(behaviourType, this);
@@ -183,6 +209,8 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 			behaviour->read(packet);
 		}
 	}
+	
+
 }
 
 void GameObject::readDummy(const InputMemoryStream& packet, const bool useFlags)

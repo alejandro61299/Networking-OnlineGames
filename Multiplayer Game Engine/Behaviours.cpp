@@ -110,6 +110,25 @@ void Spaceship::update()
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
+
+	if (gameObject->interpolationTime < 0.1f)
+	{
+		//Interpolation
+		float ratio = gameObject->interpolationTime / 0.1f;
+		gameObject->position = lerp(gameObject->initialPosition, gameObject->finalPosition, ratio);
+
+
+		gameObject->angle = lerp(gameObject->initialAngle, gameObject->finalAngle, ratio);
+
+		
+
+	}
+	else
+	{
+		//LOG("%f", gameObject->interpolationTime);
+	}
+	gameObject->interpolationTime += Time.deltaTime;
+
 }
 
 void Spaceship::destroy()
