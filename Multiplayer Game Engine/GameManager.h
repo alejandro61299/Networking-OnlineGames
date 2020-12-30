@@ -17,12 +17,18 @@ public:
 	void init();
 	void update();
 
-	void addPlayer(ClientProxy* client);
+	void spawnPlayer(const uint32 clientId );
+	void despawnPlayer(const uint32 clientId );
+
+	void spawnAllPlayers();
+	void despawnAllPlayers();
+
 
 	// Spawn Network Objects -----------------------------
 	static GameObject* spawnSpaceship(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
 	static GameObject* spawnGemstone(vec2 initialPosition, float initialAngle);
 	static GameObject* spawnPointer(uint32 clientId, vec2 initialPosition, float initialAngle);
+	static GameObject* spawnExplosion(bool bigExplosion , vec2 initialPosition, float initialAngle);
 
 private:
 

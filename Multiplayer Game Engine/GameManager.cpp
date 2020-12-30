@@ -29,6 +29,7 @@ void GameManager::update()
 		currentGameTime += Time.deltaTime;
 		if (currentGameTime >= MAX_GAME_TIME)
 		{
+			despawnAllPlayers();
 			NetworkDestroy(gemstone);
 			currentGameTime = 0.f;
 			gameState = GameState::Results;
@@ -40,6 +41,7 @@ void GameManager::update()
 		currentGameTime += Time.deltaTime;
 		if (currentGameTime >= MAX_RESULT_TIME)
 		{
+			spawnAllPlayers();
 			currentGameTime = 0.f;
 			gameState = GameState::WaitingPlayers;
 		}
@@ -77,17 +79,46 @@ void GameManager::enableInputPlayers(const bool value)
 	}
 }
 
-void GameManager::addPlayer(ClientProxy* client)
+void GameManager::spawnPlayer(const uint32 clientId)
 {
-	for (int i = 0; i < MAX_CLIENTS; ++i)
+	int clientIndex = clientId;
+	ClientProxy* client = &App->modNetServer->clientProxies[clientIndex];
+	float deg = (360.F / (float)MAX_CLIENTS) * clientIndex;
+	vec2 pos = 500.f * vec2FromDegrees(180.f + deg);
+	client->gameObject = spawnSpaceship(client->playerData.spaceshipType, pos, deg);
+	client->gameObject->tag = client->clientId;
+}
+
+void GameManager::despawnPlayer(const uint32 clientId)
+{
+	int clientIndex = clientId;
+	ClientProxy* client = &App->modNetServer->clientProxies[clientIndex];
+	if (client->gameObject != nullptr)
 	{
-		if (&App->modNetServer->clientProxies[i] == client)
+		NetworkDestroy(client->gameObject);
+		client->gameObject = nullptr;
+	}
+}
+
+void GameManager::spawnAllPlayers()
+{
+	for (auto& client : App->modNetServer->clientProxies)
+	{
+		if (client.connected && client.gameObject == nullptr)
 		{
-			float deg = (360.F / (float)MAX_CLIENTS) * i;
-			vec2 pos = 500.f * vec2FromDegrees(180.f + deg);
-			client->gameObject = spawnSpaceship(client->playerData.spaceshipType, pos, deg);
-			client->gameObject->tag = client->clientId;
-			break;
+			spawnPlayer(client.clientId);
+		}
+	}
+}
+
+void GameManager::despawnAllPlayers()
+{
+	for (auto& client : App->modNetServer->clientProxies)
+	{
+		if (client.connected && client.gameObject != nullptr)
+		{
+			GameManager::spawnExplosion(true, client.gameObject->position, 0.f);
+			despawnPlayer(client.clientId);
 		}
 	}
 }
@@ -169,3 +200,49 @@ GameObject* GameManager::spawnPointer(uint32 clientId, vec2 initialPosition, flo
 	gameObject->behaviour = pointer;
 	return gameObject;
 }
+
+GameObject* GameManager::spawnExplosion(bool bigExplosion, vec2 initialPosition, float initialAngle)
+{
+	float size;
+	vec2  position;
+
+	if (bigExplosion)
+	{
+		// Centered big explosion
+		size = 250.0f + 100.0f * Random.next();
+		position = initialPosition;
+	}
+	else
+	{
+		// Little Random explosion
+		size = 30 + 50.0f * Random.next();
+		position = initialPosition + 50.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+	}
+
+	GameObject* explosion = NetworkInstantiate();
+	explosion->position = position;
+	explosion->size = vec2{ size, size };
+	explosion->angle = 365.0f * Random.next();
+	explosion->tag = 4;
+	explosion->sprite = App->modRender->addSprite(explosion);
+	explosion->sprite->texture = App->modResources->explosion1;
+	explosion->sprite->order = 100;
+	explosion->animation = App->modRender->addAnimation(explosion);
+	explosion->animation->clip = App->modResources->explosionClip;
+	NetworkDestroy(explosion, 2.0f);
+
+	return explosion;
+}
+
+//for (int i = 0; i < MAX_CLIENTS; ++i)
+//{
+//	if (&App->modNetServer->clientProxies[i] == client)
+//	{
+//		float deg = (360.F / (float)MAX_CLIENTS) * i;
+//		vec2 pos = 500.f * vec2FromDegrees(180.f + deg);
+//		client->gameObject = spawnSpaceship(client->playerData.spaceshipType, pos, deg);
+//		client->gameObject->tag = client->clientId;
+//		break;
+//	}
+//}	
+//

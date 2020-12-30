@@ -21,7 +21,11 @@ public:
 
 	void setPlayerInfo(const char *playerName, uint8 spaceshipType);
 
+	void setPlayerGameObjectNetId(uint32 netId);
 
+	uint32 getPlayerGameObjectId();
+
+	uint32 GetClientId();
 
 private:
 
@@ -66,13 +70,11 @@ private:
 	uint8 spaceshipType = 0;
 
 	uint32 playerId = 0;
-	uint32 networkId = 0;
+	uint32 spaceshipNetId = 0;
 
 
 	// Connecting stage
-
 	float secondsSinceLastHello = 0.0f;
-
 
 	// Input ///////////
 

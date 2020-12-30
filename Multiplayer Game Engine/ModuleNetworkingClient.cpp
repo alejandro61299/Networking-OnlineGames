@@ -18,6 +18,24 @@ void ModuleNetworkingClient::setPlayerInfo(const char * pPlayerName, uint8 pSpac
 	spaceshipType = pSpaceshipType;
 }
 
+void ModuleNetworkingClient::setPlayerGameObjectNetId(uint32 netId)
+{
+	if (netId != 0)
+	{
+		spaceshipNetId = netId;
+	}
+}
+
+uint32 ModuleNetworkingClient::getPlayerGameObjectId()
+{
+	return spaceshipNetId;
+}
+
+uint32 ModuleNetworkingClient::GetClientId()
+{
+	return playerId;
+}
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -77,10 +95,10 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Text("Spaceship info:");
 			ImGui::Text(" - Type: %u", spaceshipType);
-			ImGui::Text(" - Network id: %u", networkId);
+			ImGui::Text(" - Network id: %u", spaceshipNetId);
 
 			vec2 playerPosition = {};
-			GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+			GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(spaceshipNetId);
 			if (playerGameObject != nullptr) {
 				playerPosition = playerGameObject->position;
 			}
@@ -118,7 +136,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		if (message == ServerMessage::Welcome)
 		{
 			packet >> playerId;
-			packet >> networkId;
+			packet >> spaceshipNetId;
 
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
 			state = ClientState::Connected;
@@ -256,10 +274,12 @@ void ModuleNetworkingClient::onUpdate()
 		// TODO(you): Latency management lab session
 
 		// Update camera for player
-		GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+		GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(spaceshipNetId);
 		if (playerGameObject != nullptr)
 		{
-			App->modRender->cameraPosition = playerGameObject->position;
+			App->modRender->cameraPosition = lerp(App->modRender->cameraPosition, playerGameObject->position, 10.f * Time.deltaTime);
+
+			//App->modRender->cameraPosition = playerGameObject->position;
 		}
 		else
 		{

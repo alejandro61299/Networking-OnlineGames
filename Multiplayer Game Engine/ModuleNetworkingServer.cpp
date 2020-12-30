@@ -115,7 +115,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					proxy->clientId = nextClientId++;
 
 					// Add Player to Game
-					gameManager.addPlayer(proxy);
+					gameManager.spawnPlayer(proxy->clientId);
 				}
 				else
 				{

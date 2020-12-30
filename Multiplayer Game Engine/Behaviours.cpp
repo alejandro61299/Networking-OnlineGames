@@ -46,6 +46,11 @@ void Spaceship::start()
 	lifebar->sprite = App->modRender->addSprite(lifebar);
 	lifebar->sprite->pivot = vec2{ 0.0f, 0.5f };
 	lifebar->sprite->order = 5;
+
+	if (!isServer && gameObject->tag == App->modNetClient->GetClientId())
+	{
+		App->modNetClient->setPlayerGameObjectNetId(gameObject->networkId);
+	}
 } 
 
 void Spaceship::onInput(const InputController &input)
@@ -121,9 +126,6 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 
 		if (isServer)
 		{
-			// Remove gameObject on client
-	/*		App->modNetServer*/
-
 			// Destroy the laser
 			NetworkDestroy(c2.gameObject);
 		
@@ -139,30 +141,17 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 
 			if (hitPoints <= 0)
 			{
-				// Centered big explosion
-				size = 250.0f + 100.0f * Random.next();
-				position = gameObject->position;
-				NetworkDestroy(gameObject);
+				// Big Random explosion
+				GameManager::spawnExplosion(true, gameObject->position, 0.f);
+				// Remove gameObject on client proxy data
+				App->modNetServer->gameManager.despawnPlayer(gameObject->tag);
 			}
 			else
 			{
 				// Little Random explosion
-				size = 30 + 50.0f * Random.next();
-				position = gameObject->position + 50.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+				GameManager::spawnExplosion(false, gameObject->position, 0.f);
 			}
 
-			// Explosion
-			GameObject *explosion = NetworkInstantiate();
-			explosion->position = position;
-			explosion->size = vec2{ size, size };
-			explosion->angle = 365.0f * Random.next();
-			explosion->tag = 4;
-			explosion->sprite = App->modRender->addSprite(explosion);
-			explosion->sprite->texture = App->modResources->explosion1;
-			explosion->sprite->order = 100;
-			explosion->animation = App->modRender->addAnimation(explosion);
-			explosion->animation->clip = App->modResources->explosionClip;
-			NetworkDestroy(explosion, 2.0f);
 			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 			// NOTE(jesus): Only played in the server right now...
 			// You need to somehow make this happen in clients
