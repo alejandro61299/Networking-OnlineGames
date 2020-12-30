@@ -1,6 +1,10 @@
 #pragma once
-#define MAX_GAME_TIME 10.F
-#define MAX_RESULT_TIME 10.F
+#define GAME_TIME 50.F
+#define RESPAWN_TIME 5.F
+
+#define RESULTS_TIME 5.F
+#define READY_TIME 2.F
+#define LETSROCK_TIME 2.F
 
 #define MIN_GAME_PLAYERS 2
 
@@ -8,16 +12,15 @@ struct ClientProxy;
 
 enum class GameState
 {
-	None, WaitingPlayers,  InGame, Results
+	None, WaitingPlayers, Ready,  InGame, Results
 };
 
 struct GameData
 {
 	uint8 spaceshipType = 0u;
-	bool spawned = false;
 	int points = 0;
-	float timeToSpawn = 0.f;
-	enum class PlayerState { None, Victory, Defeat, InGame, Spawning, Waiting}
+	float timeToSpawn = RESPAWN_TIME;
+	enum class PlayerState { None, Victory, Defeat, InGame, Respawning, Waiting, Ready, Go}
 	playerState = PlayerState::None;
 };
 
@@ -44,7 +47,7 @@ public:
 	static GameObject* spawnPointer(uint32 clientId, vec2 initialPosition, float initialAngle);
 	static GameObject* spawnExplosion(bool bigExplosion , vec2 initialPosition, float initialAngle);
 	static GameObject* spawnGameStateUi();
-	static GameObject* spawnPointNumberUi();
+	static GameObject* spawnNumberUi();
 
 private:
 

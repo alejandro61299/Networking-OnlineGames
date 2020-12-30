@@ -52,8 +52,13 @@ bool ModuleResources::init()
 	loadTextureAsync("gemstone.png",			&gemstone);
 	loadTextureAsync("arrow.png",				&arrow);
 	loadTextureAsync("waiting_text.png",		&waitingText);
+	loadTextureAsync("ready_text.png",			&readyText);
+	loadTextureAsync("respawn_text.png",		&respawnText);
+	loadTextureAsync("letsrock_text.png",		&letsrockText);
 	loadTextureAsync("victory_text.png",		&victoryText);
 	loadTextureAsync("defeat_text.png",			&defeatText);
+
+
 	loadTextureAsync("0.png",					&number0);
 	loadTextureAsync("1.png",					&number1);
 	loadTextureAsync("2.png",					&number2);

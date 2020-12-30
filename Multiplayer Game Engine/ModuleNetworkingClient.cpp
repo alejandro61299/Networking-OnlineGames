@@ -70,9 +70,14 @@ void ModuleNetworkingClient::onStart()
 	secondsSinceLastHello = 9999.0f;
 	secondsSinceLastInputDelivery = 0.0f;
 
-	for (auto point : pointsUI)
+	for (auto& point : pointsUI)
 	{
 		point = nullptr;
+	}
+
+	for (auto& time : gameTimeUI)
+	{
+		time = nullptr;
 	}
 }
 
@@ -147,11 +152,17 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			state = ClientState::Connected;
 			pointer = GameManager::spawnPointer(playerId, { 0.f, 0.f }, 0.f);
 			gameStateUI = GameManager::spawnGameStateUi();
+			respawnTimeUI = GameManager::spawnNumberUi();;
 
 			for (auto& point : pointsUI)
 			{
-				point = GameManager::spawnPointNumberUi();
+				point = GameManager::spawnNumberUi();
 			}
+
+			//for (auto& time : gameTimeUI)
+			//{
+			//	time = GameManager::spawnNumberUi();
+			//}
 		}
 		else if (message == ServerMessage::Unwelcome)
 		{
@@ -288,8 +299,6 @@ void ModuleNetworkingClient::onUpdate()
 		if (playerGameObject != nullptr)
 		{
 			App->modRender->cameraPosition = lerp(App->modRender->cameraPosition, playerGameObject->position, 10.f * Time.deltaTime);
-
-			//App->modRender->cameraPosition = playerGameObject->position;
 		}
 		else
 		{
@@ -298,13 +307,30 @@ void ModuleNetworkingClient::onUpdate()
 
 		// Update UI  ----------------------------------
 
+		// Game State
 		vec2 offset = { 0.f, -100.f };
 		gameStateUI->position = App->modRender->cameraPosition + offset;
 		gameStateUI->sprite->order = 200;
+		respawnTimeUI->sprite->order = -10;
 
 		if (gameData.playerState == GameData::PlayerState::Waiting)
 		{
 			gameStateUI->sprite->texture = App->modResources->waitingText;
+		}
+		else if (gameData.playerState == GameData::PlayerState::Ready)
+		{
+			gameStateUI->sprite->texture = App->modResources->readyText;
+		}
+		else if (gameData.playerState == GameData::PlayerState::Go)
+		{
+			gameStateUI->sprite->texture = App->modResources->letsrockText;
+		}
+		else if (gameData.playerState == GameData::PlayerState::Respawning)
+		{
+			gameStateUI->sprite->texture = App->modResources->respawnText;
+			respawnTimeUI->position = App->modRender->cameraPosition;
+			respawnTimeUI->sprite->texture = App->modResources->getTextureNumber(gameData.timeToSpawn + 1.f);
+			respawnTimeUI->sprite->order = 200;
 		}
 		else if (gameData.playerState == GameData::PlayerState::Victory)
 		{
@@ -320,6 +346,11 @@ void ModuleNetworkingClient::onUpdate()
 			gameStateUI->sprite->order = -10;
 		}
 
+
+		// Game Time
+
+
+		// Points
 		int points = gameData.points;
 		float width = 0.f, height = 0.f;
 		App->modRender->getViewportSize(width, height);
@@ -335,6 +366,7 @@ void ModuleNetworkingClient::onUpdate()
 			position += { -20.f, 0 };
 			points /= 10;
 		}
+
 	}
 }
 
@@ -365,11 +397,26 @@ void ModuleNetworkingClient::onDisconnect()
 	if (gameStateUI != nullptr)
 		Destroy(gameStateUI);
 
-	if (pointsUI != nullptr)
+	for (auto& point : pointsUI)
 	{
-		for (auto& point : pointsUI)
+		if (point != nullptr)
 		{
 			Destroy(point);
+
 		}
 	}
+
+	if (respawnTimeUI != nullptr)
+	{
+		Destroy(respawnTimeUI);
+	}
+
+	for (auto& time : gameTimeUI)
+	{
+		if (time != nullptr)
+		{
+			Destroy(time);
+		}
+	}
+	
 }

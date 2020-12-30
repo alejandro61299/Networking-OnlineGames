@@ -79,6 +79,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ClientProxy &pr
 
 	// Game data ----------------------------------------
 	packet <<  proxy.gameData.playerState;
+	packet <<  proxy.gameData.timeToSpawn;
 	packet <<  proxy.gameData.points;
 
 	// --------------------------------------------------

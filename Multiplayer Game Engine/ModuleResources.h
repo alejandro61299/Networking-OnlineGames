@@ -22,6 +22,9 @@ public:
 
 
 	Texture *waitingText = nullptr;
+	Texture *readyText = nullptr;
+	Texture *letsrockText = nullptr;
+	Texture *respawnText = nullptr;
 	Texture *victoryText = nullptr;
 	Texture *defeatText = nullptr;
 

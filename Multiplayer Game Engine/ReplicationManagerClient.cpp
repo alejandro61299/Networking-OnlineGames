@@ -87,6 +87,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 
 	// Game data ----------------------------------------
 	packet >> App->modNetClient->gameData.playerState;
+	packet >> App->modNetClient->gameData.timeToSpawn;
 	packet >> App->modNetClient->gameData.points;
 
 	// --------------------------------------------------

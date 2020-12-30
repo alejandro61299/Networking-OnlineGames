@@ -21,19 +21,41 @@ void GameManager::update()
 
 		if (getNumPlayers() >= MIN_GAME_PLAYERS)
 		{
+			currentGameTime = 0.f;
+			gameState = GameState::Ready;
+		}
+
+		break;
+	} 
+	case GameState::Ready:
+	{
+		enableInputPlayers(false);
+		currentGameTime += Time.deltaTime;
+
+		if (currentGameTime < READY_TIME)
+		{
+			setPlayersState(GameData::PlayerState::Ready);
+		}
+		else 
+		{
+			setPlayersState(GameData::PlayerState::Go);
+		}
+
+		if (currentGameTime >= READY_TIME + LETSROCK_TIME)
+		{
 			enableInputPlayers(true);
 			gemstone = spawnGemstone({ 0.f, 0.f }, 0.f);
 			currentGameTime = 0.f;
 			setPlayersState(GameData::PlayerState::InGame);
 			gameState = GameState::InGame;
 		}
-
 		break;
-	} 
+	}
 	case GameState::InGame: 
 	{
 		currentGameTime += Time.deltaTime;
-		if (currentGameTime >= MAX_GAME_TIME)
+
+		if (currentGameTime >= GAME_TIME)
 		{
 			despawnAllPlayers();
 			NetworkDestroy(gemstone);
@@ -41,12 +63,31 @@ void GameManager::update()
 			currentGameTime = 0.f;
 			gameState = GameState::Results;
 		}
+		else
+		{
+			// Respawn logic -----------------------------
+			for (auto& client : App->modNetServer->clientProxies)
+			{
+				if (client.connected && client.gameObject == nullptr)
+				{
+					client.gameData.playerState = GameData::PlayerState::Respawning;
+					client.gameData.timeToSpawn -= Time.deltaTime;
+					if (client.gameData.timeToSpawn <= 0.f)
+					{
+						client.gameData.playerState = GameData::PlayerState::InGame;
+						spawnPlayer(client.clientId);
+						client.gameData.timeToSpawn = RESPAWN_TIME;
+					}
+				}
+			}
+		}
+
 		break;
 	} 
 	case GameState::Results:
 	{
 		currentGameTime += Time.deltaTime;
-		if (currentGameTime >= MAX_RESULT_TIME)
+		if (currentGameTime >= RESULTS_TIME)
 		{
 			spawnAllPlayers();
 			currentGameTime = 0.f;
@@ -104,6 +145,7 @@ void GameManager::spawnPlayer(const uint32 clientId)
 	vec2 pos = 500.f * vec2FromDegrees(180.f + deg);
 	client->gameObject = spawnSpaceship(client->gameData.spaceshipType, pos, deg);
 	client->gameObject->tag = client->clientId;
+	client->gameData.timeToSpawn = RESPAWN_TIME;
 }
 
 void GameManager::despawnPlayer(const uint32 clientId)
@@ -113,6 +155,7 @@ void GameManager::despawnPlayer(const uint32 clientId)
 	{
 		NetworkDestroy(client->gameObject);
 		client->gameObject = nullptr;
+		client->gameData.timeToSpawn = RESPAWN_TIME;
 	}
 }
 
@@ -309,7 +352,7 @@ GameObject* GameManager::spawnGameStateUi()
 	return gameObject;
 }
 
-GameObject* GameManager::spawnPointNumberUi()
+GameObject* GameManager::spawnNumberUi()
 {
 	GameObject* gameObject = Instantiate();
 	gameObject->position = { 0.f, 0.f };

@@ -9,6 +9,8 @@ public:
 	// Game 
 	//////////////////////////////////////////////////////////////////////
 	GameObject* pointsUI[4];
+	GameObject* gameTimeUI[4];
+	GameObject* respawnTimeUI = nullptr;
 	GameObject* gameStateUI = nullptr;
 	GameObject* pointer = nullptr;
 	GameData gameData; 
