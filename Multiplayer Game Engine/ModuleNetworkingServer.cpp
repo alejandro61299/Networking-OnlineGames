@@ -111,7 +111,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					proxy->address.sin_port = fromAddress.sin_port;
 					proxy->connected = true;
 					proxy->name = playerName;
-					proxy->playerData.spaceshipType = spaceshipType;
+					proxy->gameData.spaceshipType = spaceshipType;
 					proxy->clientId = nextClientId++;
 
 					// Add Player to Game
@@ -283,6 +283,7 @@ void ModuleNetworkingServer::onUpdate()
 					clientProxy.secondsSinceLastReplication = clientProxy.secondsSinceLastReplication - timeInterval;
 				}
 
+
 				//Check if the packets don't recivied any confirmation
 				clientProxy.deliveryManager.processTimedOutPackets();
 
@@ -422,6 +423,18 @@ ClientProxy * ModuleNetworkingServer::getClientProxy(const sockaddr_in &clientAd
 		}
 	}
 
+	return nullptr;
+}
+
+ClientProxy* ModuleNetworkingServer::getClientProxyById(const uint32 clientID)
+{
+	for (auto& proxy : clientProxies )
+	{
+		if (proxy.connected && proxy.clientId == clientID)
+		{
+			return &proxy;
+		}
+	}
 	return nullptr;
 }
 

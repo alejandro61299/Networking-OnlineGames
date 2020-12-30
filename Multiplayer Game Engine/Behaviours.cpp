@@ -104,31 +104,26 @@ void Spaceship::onInput(const InputController &input)
 
 void Spaceship::update()
 {
+	//if (gameObject->interpolationTime < 0.1f)
+	//{
+	//	//Interpolation
+	//	float ratio = gameObject->interpolationTime / 0.1f;
+	//	gameObject->position = lerp(gameObject->initialPosition, gameObject->finalPosition, ratio);
+	//	gameObject->angle = lerp(gameObject->initialAngle, gameObject->finalAngle, ratio);
+	//}
+	//else
+	//{
+	//	//LOG("%f", gameObject->interpolationTime);
+	//}
+
+	gameObject->interpolationTime += Time.deltaTime;
+
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };
 	const float lifeRatio = max(0.01f, (float)(hitPoints) / (MAX_HIT_POINTS));
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
-
-	if (gameObject->interpolationTime < 0.1f)
-	{
-		//Interpolation
-		float ratio = gameObject->interpolationTime / 0.1f;
-		gameObject->position = lerp(gameObject->initialPosition, gameObject->finalPosition, ratio);
-
-
-		gameObject->angle = lerp(gameObject->initialAngle, gameObject->finalAngle, ratio);
-
-		
-
-	}
-	else
-	{
-		//LOG("%f", gameObject->interpolationTime);
-	}
-	gameObject->interpolationTime += Time.deltaTime;
-
 }
 
 void Spaceship::destroy()
@@ -204,15 +199,30 @@ void Gemstone::update()
 		if (playerSpaceship == nullptr)
 		{
 			ownerTag = UINT32_MAX;
+			timePoints = 0.f;
 			return;
 		}
 
+		// Update lerp position
 		float speed = 2.f;
 		vec2 offset = gameObject->position - playerSpaceship->position;
 		float distance = length(offset);
 
 		if (distance > 90.f)
 			gameObject->position = lerp(gameObject->position, playerSpaceship->position, speed * Time.deltaTime);
+
+		// Add Points to Client Game Data 
+
+		if (isServer)
+		{
+			timePoints += Time.deltaTime;
+			if (timePoints >= GEMSTONE_POINTS_INTERVAL)
+			{
+				timePoints = 0.f;
+				ClientProxy* client = App->modNetServer->getClientProxyById(playerSpaceship->tag);
+				if (client != nullptr) client->gameData.points += 10;
+			}
+		}
 	}
 }
 

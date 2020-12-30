@@ -20,12 +20,31 @@ public:
 	Texture *gemstone = nullptr;
 	Texture *arrow = nullptr;
 
-	AnimationClip *explosionClip = nullptr;
 
+	Texture *waitingText = nullptr;
+	Texture *victoryText = nullptr;
+	Texture *defeatText = nullptr;
+
+	Texture* number0 = nullptr;
+	Texture* number1 = nullptr;
+	Texture* number2 = nullptr;
+	Texture* number3 = nullptr;
+	Texture* number4 = nullptr;
+	Texture* number5 = nullptr;
+	Texture* number6 = nullptr;
+	Texture* number7 = nullptr;
+	Texture* number8 = nullptr;
+	Texture* number9 = nullptr;
+
+	//Texture* numbers[10];
+
+	AnimationClip *explosionClip = nullptr;
 	AudioClip *audioClipLaser = nullptr;
 	AudioClip *audioClipExplosion = nullptr;
 
 	bool finishedLoading = false;
+
+	Texture* getTextureNumber(int num);
 
 private:
 
@@ -42,7 +61,7 @@ private:
 		void execute() override;
 	};
 
-	static const int MAX_RESOURCES = 16;
+	static const int MAX_RESOURCES = 30;
 	TaskLoadTexture tasks[MAX_RESOURCES] = {};
 	uint32 taskCount = 0;
 	uint32 finishedTaskCount = 0;

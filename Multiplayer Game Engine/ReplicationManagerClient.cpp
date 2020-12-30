@@ -43,9 +43,10 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 		return;
 	}
 	
+	// Actions -------------------------------------------
+
 	size_t size;
 	packet >> size;
-
 	packet >> lastInputRecivied;
 
 	for (int i = 0; i < size; ++i)
@@ -84,4 +85,9 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet, uint32& las
 		}
 	}
 
+	// Game data ----------------------------------------
+	packet >> App->modNetClient->gameData.playerState;
+	packet >> App->modNetClient->gameData.points;
+
+	// --------------------------------------------------
 }

@@ -69,6 +69,11 @@ void ModuleNetworkingClient::onStart()
 
 	secondsSinceLastHello = 9999.0f;
 	secondsSinceLastInputDelivery = 0.0f;
+
+	for (auto point : pointsUI)
+	{
+		point = nullptr;
+	}
 }
 
 void ModuleNetworkingClient::onGui()
@@ -141,7 +146,12 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
 			state = ClientState::Connected;
 			pointer = GameManager::spawnPointer(playerId, { 0.f, 0.f }, 0.f);
+			gameStateUI = GameManager::spawnGameStateUi();
 
+			for (auto& point : pointsUI)
+			{
+				point = GameManager::spawnPointNumberUi();
+			}
 		}
 		else if (message == ServerMessage::Unwelcome)
 		{
@@ -285,6 +295,46 @@ void ModuleNetworkingClient::onUpdate()
 		{
 			// This means that the player has been destroyed (e.g. killed)
 		}
+
+		// Update UI  ----------------------------------
+
+		vec2 offset = { 0.f, -100.f };
+		gameStateUI->position = App->modRender->cameraPosition + offset;
+		gameStateUI->sprite->order = 200;
+
+		if (gameData.playerState == GameData::PlayerState::Waiting)
+		{
+			gameStateUI->sprite->texture = App->modResources->waitingText;
+		}
+		else if (gameData.playerState == GameData::PlayerState::Victory)
+		{
+			gameStateUI->sprite->texture = App->modResources->victoryText;
+		}
+		else if (gameData.playerState == GameData::PlayerState::Defeat)
+		{
+			gameStateUI->sprite->texture = App->modResources->defeatText;
+		}
+		else
+		{
+			gameStateUI->sprite->texture = nullptr;
+			gameStateUI->sprite->order = -10;
+		}
+
+		int points = gameData.points;
+		float width = 0.f, height = 0.f;
+		App->modRender->getViewportSize(width, height);
+		vec2 position = { width * 0.5f - width * 0.1f, -height * 0.5f + height * 0.1f };
+
+
+		for (int i = 0; i < 4; ++i)
+		{
+			pointsUI[3 - i]->position = App->modRender->cameraPosition + position;
+			pointsUI[3 - i]->sprite->texture = App->modResources->getTextureNumber(points % 10);
+			pointsUI[3 - i]->sprite->order = 10;
+
+			position += { -20.f, 0 };
+			points /= 10;
+		}
 	}
 }
 
@@ -308,4 +358,18 @@ void ModuleNetworkingClient::onDisconnect()
 	}
 
 	App->modRender->cameraPosition = {};
+
+	if ( pointer != nullptr)
+		Destroy(pointer);
+
+	if (gameStateUI != nullptr)
+		Destroy(gameStateUI);
+
+	if (pointsUI != nullptr)
+	{
+		for (auto& point : pointsUI)
+		{
+			Destroy(point);
+		}
+	}
 }

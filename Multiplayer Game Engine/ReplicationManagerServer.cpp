@@ -28,17 +28,19 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet, ClientProxy &proxy)
 {
+
+	// TODO(you): Reliability on top of UDP lab session
+
+
 	packet << PROTOCOL_ID;
 	packet << ServerMessage::Replication;
 
 	proxy.deliveryManager.writeSequenceNumber(packet);
 
+	// Actions -------------------------------------------
+
 	packet << actions.size();
-
-	// TODO(you): Reliability on top of UDP lab session
-	//Send the last input processed
-	packet << proxy.lastInputRecived;
-
+	packet << proxy.lastInputRecived;  	//Send the last input processed
 
 	for (auto item = actions.begin(); item != actions.end();) 
 	{
@@ -74,6 +76,12 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ClientProxy &pr
 
 		++item; // Increased here by erase 
 	}
-	proxy.deliveryManager.packetsSaved.push_back(packet);
 
+	// Game data ----------------------------------------
+	packet <<  proxy.gameData.playerState;
+	packet <<  proxy.gameData.points;
+
+	// --------------------------------------------------
+
+	proxy.deliveryManager.packetsSaved.push_back(packet);
 }

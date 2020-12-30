@@ -1,6 +1,7 @@
 #pragma once
 
 #define GEMSTONE_TAG 20U
+#define GEMSTONE_POINTS_INTERVAL 2.f
 
 enum class BehaviourType : uint8;
 
@@ -84,6 +85,8 @@ struct Spaceship : public Behaviour
 struct Gemstone : public Behaviour
 {
 	uint32 ownerTag = UINT32_MAX;
+
+	float timePoints = 0.f;
 
 	BehaviourType type() const override { return BehaviourType::Gemstone; }
 

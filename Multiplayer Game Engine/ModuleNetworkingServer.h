@@ -10,15 +10,8 @@ struct ClientProxy
 	uint32 clientId;
 
 	std::string name;
-	GameObject* gameObject = nullptr;
-
-	struct PlayerData
-	{
-		uint8 spaceshipType = 0u;
-		bool spawned = true;
-		int points = 0;
-		float timeToSpawn = 0.f;
-	} playerData;
+	GameObject* gameObject = nullptr;	
+	GameData gameData;
 
 	// TODO(done): UDP virtual connection lab session
 	double lastPacketRecivedTime = 0.0f;
@@ -47,7 +40,9 @@ public:
 
 	void setListenPort(int port);
 
+	ClientProxy* getClientProxy(const sockaddr_in& clientAddress);
 
+	ClientProxy* getClientProxyById(const uint32 clientID);
 
 private:
 
@@ -80,8 +75,6 @@ private:
 	ClientProxy clientProxies[MAX_CLIENTS];
 
 	ClientProxy * createClientProxy();
-
-	ClientProxy * getClientProxy(const sockaddr_in &clientAddress);
 
     void destroyClientProxy(ClientProxy *clientProxy);
 

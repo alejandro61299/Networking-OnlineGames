@@ -517,6 +517,14 @@ static void selectAndSortObjects(GameObject toSort[MAX_GAME_OBJECTS], GameObject
 	}
 }
 
+void ModuleRender::getViewportSize(float &width, float&height)
+{
+	RECT rect;
+	::GetClientRect(hwnd, &rect);
+	width = (float)(rect.right - rect.left);
+	height = (float)(rect.bottom - rect.top);
+}
+
 void ModuleRender::renderScene()
 {
 	ID3D11DeviceContext *ctx = g_pd3dDeviceContext;

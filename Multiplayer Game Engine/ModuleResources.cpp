@@ -1,5 +1,6 @@
 #include "Networks.h"
-
+#include <string>
+#include "ModuleResources.h"
 
 #if defined(USE_TASK_MANAGER)
 
@@ -11,6 +12,20 @@ void ModuleResources::TaskLoadTexture::execute()
 
 #endif
 
+Texture* ModuleResources::getTextureNumber(int num)
+{
+	if (num == 0) return  number0;
+	else if (num == 1) return  number1;
+	else if (num == 2) return  number2;
+	else if (num == 3) return  number3;
+	else if (num == 4) return  number4;
+	else if (num == 5) return  number5;
+	else if (num == 6) return  number6;
+	else if (num == 7) return  number7;
+	else if (num == 8) return  number8;
+	else if (num == 9) return  number9;
+	else return nullptr;
+}
 
 bool ModuleResources::init()
 {
@@ -36,6 +51,27 @@ bool ModuleResources::init()
 	loadTextureAsync("explosion1.png",			&explosion1);
 	loadTextureAsync("gemstone.png",			&gemstone);
 	loadTextureAsync("arrow.png",				&arrow);
+	loadTextureAsync("waiting_text.png",		&waitingText);
+	loadTextureAsync("victory_text.png",		&victoryText);
+	loadTextureAsync("defeat_text.png",			&defeatText);
+	loadTextureAsync("0.png",					&number0);
+	loadTextureAsync("1.png",					&number1);
+	loadTextureAsync("2.png",					&number2);
+	loadTextureAsync("3.png",					&number3);
+	loadTextureAsync("4.png",					&number4);
+	loadTextureAsync("5.png",					&number5);
+	loadTextureAsync("6.png",					&number6);
+	loadTextureAsync("7.png",					&number7);
+	loadTextureAsync("8.png",					&number8);
+	loadTextureAsync("9.png",					&number9);
+
+	//for (int i = 0; i < 10; ++i)
+	//{
+	//	numbers[i] = nullptr;
+	//	std::string file = std::to_string(i) + std::string(".png");
+	//	loadTextureAsync(file.data(), &numbers[i]);
+	//}
+
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");

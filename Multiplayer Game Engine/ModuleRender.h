@@ -99,6 +99,7 @@ public:
 
 	void present();
 
+	void getViewportSize(float& width, float& height);
 
 	// Attributes
 
@@ -108,6 +109,8 @@ public:
 
 
 private:
+
+
 
 	void renderScene();
 

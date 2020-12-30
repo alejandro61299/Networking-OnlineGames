@@ -83,9 +83,8 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 
 void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 {
-	float positionX, positionY;
-	float newAngle;
-
+	//float positionX, positionY;
+	//float newAngle;
 
 	if (useFlags)
 	{
@@ -94,12 +93,16 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::POSITION)))
 	{
-		packet >> positionX;
-		packet >> positionY;
+		//packet >> positionX;
+		//packet >> positionY;		
+		packet >> position.x;
+		packet >> position.y;
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ROTATION)))
 	{
-		packet >> newAngle;
+		//packet >> newAngle;
+		packet >> angle;
+
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::SIZE)))
 	{
@@ -179,27 +182,27 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 			BehaviourType behaviourType = BehaviourType::None;
 			packet >> behaviourType;
 
-			if (behaviourType == BehaviourType::Spaceship)
-			{
-				initialPosition = finalPosition;
-				finalPosition.x = positionX;
-				finalPosition.y = positionY;
+			//if (behaviourType == BehaviourType::Spaceship)
+			//{
+			//	finalPosition.x = positionX;
+			//	finalPosition.y = positionY;
 
-				initialAngle = finalAngle;
-				finalAngle = newAngle;
+			//	initialPosition = finalPosition;
 
-				interpolationTime = 0.0f;
-			}
-			else
-			{
-				position.x = positionX;
-				position.y = positionY;
-				finalPosition.x = positionX;
-				finalPosition.y = positionY;
+			//	finalAngle = newAngle;
+			//	initialAngle = finalAngle;
 
-				angle = newAngle;
-				finalAngle = newAngle;
-			}
+			//	interpolationTime = 0.0f;
+			//}
+			//else
+			//{
+			//	position.x = positionX;
+			//	position.y = positionY;
+			//	finalPosition.x = positionX;
+			//	finalPosition.y = positionY;
+			//	angle = newAngle;
+			//	finalAngle = newAngle;
+			//}
 
 			if (behaviour == nullptr)
 			{
