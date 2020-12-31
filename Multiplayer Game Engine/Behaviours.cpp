@@ -104,19 +104,17 @@ void Spaceship::onInput(const InputController &input)
 
 void Spaceship::update()
 {
-	//if (gameObject->interpolationTime < 0.1f)
-	//{
-	//	//Interpolation
-	//	float ratio = gameObject->interpolationTime / 0.1f;
-	//	gameObject->position = lerp(gameObject->initialPosition, gameObject->finalPosition, ratio);
-	//	gameObject->angle = lerp(gameObject->initialAngle, gameObject->finalAngle, ratio);
-	//}
-	//else
-	//{
-	//	//LOG("%f", gameObject->interpolationTime);
-	//}
-
 	gameObject->interpolationTime += Time.deltaTime;
+
+	float ratio = gameObject->interpolationTime / REPLICATION_INTERVAL_SECONDS;
+
+	if (ratio <= 1)
+	{
+		//Interpolation
+		gameObject->position = lerp(gameObject->initialPosition, gameObject->finalPosition, ratio);
+		gameObject->angle = lerp(gameObject->initialAngle, gameObject->finalAngle, ratio);
+	}
+
 
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };

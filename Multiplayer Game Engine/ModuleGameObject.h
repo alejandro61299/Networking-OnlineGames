@@ -31,7 +31,7 @@ struct GameObject
 	float initialAngle = 0.0f;
 	float finalAngle = 0.0f;
 
-	float interpolationTime = 0.0f;
+	float interpolationTime = 2.0f;
 
 	// Render component
 	Sprite *sprite = nullptr;

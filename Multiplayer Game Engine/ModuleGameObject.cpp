@@ -11,6 +11,7 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 	{
 		packet << position.x;
 		packet << position.y;
+		this;
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ROTATION)))
 	{
@@ -83,8 +84,11 @@ void GameObject::write(OutputMemoryStream& packet, const bool useFlags)
 
 void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 {
-	//float positionX, positionY;
-	//float newAngle;
+	float positionX = 0.f, positionY = 0.f;
+	float newAngle = 0.f;
+
+	bool move = false;
+	bool rotate = false;
 
 	if (useFlags)
 	{
@@ -93,15 +97,17 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::POSITION)))
 	{
-		//packet >> positionX;
-		//packet >> positionY;		
-		packet >> position.x;
-		packet >> position.y;
+		packet >> positionX;
+		packet >> positionY;	
+		move = true;
+		//packet >> position.x;
+		//packet >> position.y;
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::ROTATION)))
 	{
-		//packet >> newAngle;
-		packet >> angle;
+		packet >> newAngle;
+		rotate = true;
+		//packet >> angle;
 
 	}
 	if (!useFlags || (useFlags && HasUpdateFlag(UpdateFlags::SIZE)))
@@ -182,27 +188,58 @@ void GameObject::read(const InputMemoryStream& packet, const bool useFlags)
 			BehaviourType behaviourType = BehaviourType::None;
 			packet >> behaviourType;
 
-			//if (behaviourType == BehaviourType::Spaceship)
-			//{
-			//	finalPosition.x = positionX;
-			//	finalPosition.y = positionY;
+			if (behaviourType == BehaviourType::Spaceship)
+			{
+				if (!useFlags)
+				{
+					// if create
+					if (move)
+					{
+						initialPosition.x = positionX;
+						initialPosition.y = positionY;
 
-			//	initialPosition = finalPosition;
+						position = initialPosition;
 
-			//	finalAngle = newAngle;
-			//	initialAngle = finalAngle;
+					}
 
-			//	interpolationTime = 0.0f;
-			//}
-			//else
-			//{
-			//	position.x = positionX;
-			//	position.y = positionY;
-			//	finalPosition.x = positionX;
-			//	finalPosition.y = positionY;
-			//	angle = newAngle;
-			//	finalAngle = newAngle;
-			//}
+					if (rotate)
+						angle = initialAngle = newAngle;
+
+					interpolationTime = -1.0f;
+
+
+				}
+				else
+				{
+					// if update
+					initialPosition = position;
+
+					initialAngle = angle;
+
+					interpolationTime = 0.0f;
+
+					finalPosition.x = positionX;
+					finalPosition.y = positionY;
+					finalAngle = newAngle;
+
+				}
+				
+			}
+			else
+			{
+				if (move)
+				{
+					position.x = positionX;
+					position.y = positionY;
+					finalPosition.x = positionX;
+					finalPosition.y = positionY;
+				}
+				if (rotate)
+				{
+					angle = newAngle;
+					finalAngle = newAngle;
+				}
+			}
 
 			if (behaviour == nullptr)
 			{

@@ -273,14 +273,13 @@ void ModuleNetworkingServer::onUpdate()
 
 				// World Replication -------------------------
 				clientProxy.secondsSinceLastReplication += Time.deltaTime;
-				float timeInterval = 0.04f;
 
-				if (clientProxy.secondsSinceLastReplication > timeInterval)
+				if (clientProxy.secondsSinceLastReplication > REPLICATION_INTERVAL_SECONDS)
 				{
 					OutputMemoryStream packetReplication;
 					clientProxy.replicationServer.write(packetReplication, clientProxy);
 					sendPacket(packetReplication, clientProxy.address);
-					clientProxy.secondsSinceLastReplication = clientProxy.secondsSinceLastReplication - timeInterval;
+					clientProxy.secondsSinceLastReplication = clientProxy.secondsSinceLastReplication - REPLICATION_INTERVAL_SECONDS;
 				}
 
 

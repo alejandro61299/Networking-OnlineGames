@@ -43,6 +43,8 @@
 #define DEFAULT_PACKET_SIZE                     Kilobytes(4)
 #define PING_INTERVAL_SECONDS                           0.5f
 #define CONFIRMATION_INTERVAL_SECONDS                   0.2f
+#define REPLICATION_INTERVAL_SECONDS                    0.1f
+
 
 
 ////////////////////////////////////////////////////////////////////////
