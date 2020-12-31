@@ -1,6 +1,7 @@
 #pragma once
 #define GAME_TIME 50.F
 #define RESPAWN_TIME 5.F
+#define WAIT_TIME 5.F
 
 #define RESULTS_TIME 5.F
 #define READY_TIME 2.F
@@ -31,6 +32,7 @@ public:
 	GameManager();
 	void init();
 	void update();
+	GameState getState() { return gameState; };
 
 	void spawnPlayer(const uint32 clientId );
 	void despawnPlayer(const uint32 clientId );

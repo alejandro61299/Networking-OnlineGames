@@ -153,6 +153,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			pointer = GameManager::spawnPointer(playerId, { 0.f, 0.f }, 0.f);
 			gameStateUI = GameManager::spawnGameStateUi();
 			respawnTimeUI = GameManager::spawnNumberUi();;
+			respawnTimeUI->size = { 50.f, 50.f };
 
 			for (auto& point : pointsUI)
 			{
@@ -363,7 +364,7 @@ void ModuleNetworkingClient::onUpdate()
 			pointsUI[3 - i]->sprite->texture = App->modResources->getTextureNumber(points % 10);
 			pointsUI[3 - i]->sprite->order = 10;
 
-			position += { -20.f, 0 };
+			position += { -23.f, 0 };
 			points /= 10;
 		}
 

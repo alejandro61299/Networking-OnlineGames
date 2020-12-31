@@ -21,8 +21,18 @@ void GameManager::update()
 
 		if (getNumPlayers() >= MIN_GAME_PLAYERS)
 		{
+			currentGameTime += Time.deltaTime;
+
+			if (currentGameTime >  WAIT_TIME)
+			{
+				currentGameTime = 0.f;
+				gameState = GameState::Ready;
+			}
+			
+		}
+		else
+		{
 			currentGameTime = 0.f;
-			gameState = GameState::Ready;
 		}
 
 		break;
@@ -55,7 +65,7 @@ void GameManager::update()
 	{
 		currentGameTime += Time.deltaTime;
 
-		if (currentGameTime >= GAME_TIME)
+		if (currentGameTime >= GAME_TIME || getNumPlayers() < MIN_GAME_PLAYERS)
 		{
 			despawnAllPlayers();
 			NetworkDestroy(gemstone);
@@ -106,7 +116,7 @@ int GameManager::getNumPlayers()
 
 	for (auto& client : App->modNetServer->clientProxies)
 	{
-		if (client.connected && client.gameObject != nullptr)
+		if (client.connected)
 		{
 			++connectedPlayers;
 		}
@@ -356,7 +366,7 @@ GameObject* GameManager::spawnNumberUi()
 {
 	GameObject* gameObject = Instantiate();
 	gameObject->position = { 0.f, 0.f };
-	gameObject->size = { 20.f, 20.f };
+	gameObject->size = { 25.f, 25.f };
 	gameObject->angle = 0.f;
 
 	// Create sprite

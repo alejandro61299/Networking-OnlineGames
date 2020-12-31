@@ -1,7 +1,7 @@
 #pragma once
 
 #define GEMSTONE_TAG 20U
-#define GEMSTONE_POINTS_INTERVAL 2.f
+#define GEMSTONE_POINTS_INTERVAL 1.f
 
 enum class BehaviourType : uint8;
 

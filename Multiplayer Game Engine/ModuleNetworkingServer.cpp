@@ -95,7 +95,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 		if (message == ClientMessage::Hello)
 		{
-			if (proxy == nullptr)
+			if (proxy == nullptr && gameManager.getState() == GameState::WaitingPlayers)
 			{
 				proxy = createClientProxy();
 
@@ -273,7 +273,7 @@ void ModuleNetworkingServer::onUpdate()
 
 				// World Replication -------------------------
 				clientProxy.secondsSinceLastReplication += Time.deltaTime;
-				float timeInterval = 0.1f;
+				float timeInterval = 0.04f;
 
 				if (clientProxy.secondsSinceLastReplication > timeInterval)
 				{
